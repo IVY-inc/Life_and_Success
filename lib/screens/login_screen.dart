@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-
-import './welcome_screen.dart';
+import 'package:life_and_success/models/auth_error.dart';
+import 'package:life_and_success/widgets/background_with_footers.dart';
+import 'package:provider/provider.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import '../providers/auth.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -8,52 +11,71 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _userNameHasError = false; //for validation
-  bool _passwordHasError = false; // " "
+  bool _emailHasError = false; //for validation
+  final _emailController = TextEditingController();
+  final _emailFocusNode = FocusNode();
   bool _isLoading = false; //To display circularProgressIndicator
-  final _userNameController = TextEditingController();
-  final _userNameFocusNode = FocusNode();
+  bool _passwordHasError = false; // " "
   final _passwordController = TextEditingController();
   final _passwordFocusNode = FocusNode();
 
   @override
   void dispose() {
-    _userNameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
   }
+
   //when button is clicked.. validation is done here
-  void validateForm() {
-    if (_userNameController.text.isEmpty) {
+  void validateForm() async {
+    if (_emailController.text.isEmpty) {
       setState(() {
-        _userNameHasError = true;
-        FocusScope.of(context).requestFocus(_userNameFocusNode);
+        _emailHasError = true;
+        FocusScope.of(context).requestFocus(_emailFocusNode);
       });
     } else if (_passwordController.text.isEmpty) {
       setState(() {
         _passwordHasError = true;
       });
     } else {
-      _userNameHasError = false;
+      _emailHasError = false;
       _passwordHasError = false;
       setState(() {
         _isLoading = true;
       });
-      //TODO: Database checks and logins should be here.. and delay should be removed
-      Future.delayed(Duration(seconds: 2)).then((_) {
+      try {
+        await Provider.of<Auth>(context, listen: false)
+            .logUserIn(_emailController.text, _passwordController.text);
         _isLoading = false;
-        Navigator.pushReplacementNamed(context, WelcomeScreen.routeName);
-      });
+      } catch (e) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Okay'),
+                onPressed: () => Navigator.of(ctx).pop(),
+              )
+            ],
+            content: Text(e.toString()),
+            title: Text('An error occured!'),
+          ),
+        );
+
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final mediaquery = MediaQuery.of(context);
-    
-    //Username input
-    final userName = Row(
+
+    //email input
+    final email = Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         Icon(
@@ -64,16 +86,15 @@ class _LoginScreenState extends State<LoginScreen> {
         Expanded(
           child: TextField(
             keyboardType: TextInputType.text,
-            focusNode: _userNameFocusNode,
+            focusNode: _emailFocusNode,
             decoration: InputDecoration(
-                labelText: 'Username',
-                hintText: 'Nelson Chime',
-                errorText: _userNameHasError ? '' : null,
+                labelText: 'Email',
+                errorText: _emailHasError ? '' : null,
                 focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(
                   color: Colors.black,
                 ))),
-            controller: _userNameController,
+            controller: _emailController,
             onSubmitted: (_) {
               FocusScope.of(context).requestFocus(_passwordFocusNode);
             },
@@ -96,7 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
               labelText: 'Password',
-              hintText: 'Password',
               errorText: _passwordHasError ? '' : null,
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(
@@ -105,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             obscureText: true,
+            onSubmitted: (_) {},
             controller: _passwordController,
             focusNode: _passwordFocusNode,
           ),
@@ -114,20 +135,24 @@ class _LoginScreenState extends State<LoginScreen> {
 
     //***************Showing screen, separated because of circularProgressIndicator showing in Stack
     final screen = Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            userName,
+            email,
             SizedBox(height: 10),
             passWord,
             SizedBox(
               height: 30,
             ),
-            const Text(
-              'Forgot Password?',
-              textAlign: TextAlign.center,
+            GestureDetector(
+              onTap: () => Navigator.of(context)
+                  .pushNamed(RecoverPasswordScreen.routeName),
+              child: const Text(
+                'Forgot Password?',
+                textAlign: TextAlign.center,
+              ),
             ),
             const SizedBox(
               height: 20,
@@ -146,15 +171,91 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-    return _isLoading
-        ? Stack(
-            children: <Widget>[
-              screen,
-              Center(
-                child: CircularProgressIndicator(),
-              ),
-            ],
-          )
-        : screen;
+    return ModalProgressHUD(child: screen, inAsyncCall: _isLoading);
+  }
+}
+
+class RecoverPasswordScreen extends StatefulWidget {
+  static const routeName = 'password-recover';
+
+  @override
+  _RecoverPasswordScreenState createState() => _RecoverPasswordScreenState();
+}
+
+class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
+  bool _hasError = false;
+  final _textController = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    void _validateAndSubmit() async {
+      if (_textController.text == '') {
+        setState(() {
+          _hasError = true;
+        });
+        return;
+      } else if (!_textController.text.contains('@')) {
+        setState(() {
+          _hasError = true;
+        });
+        return;
+      } else {
+        setState(() {
+          _hasError = false;
+        });
+        try {
+          await Provider.of<Auth>(context, listen: false)
+              .recoverPassword(email: _textController.text);
+          Navigator.of(context).popAndPushNamed('');
+          //TODO: Login from here
+        } catch (e) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Okay'),
+                  onPressed: () => Navigator.of(ctx).pop(),
+                )
+              ],
+              content: Text(e.toString()),
+              title: Text('An error occured!'),
+            ),
+          );
+        }
+      }
+    }
+
+    return BackgroundWithFooter(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Life and Success'),
+        ),
+        body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextField(
+                  controller: _textController,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    errorText: _hasError ? 'Invalid Email' : null,
+                    labelText: 'Email address',
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 30),
+                RaisedButton(
+                  child: Text('SEND'),
+                  onPressed: _validateAndSubmit,
+                ),
+              ],
+            )),
+      ),
+    );
   }
 }

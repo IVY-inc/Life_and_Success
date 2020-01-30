@@ -1,4 +1,4 @@
-package com.example.life_and_success
+package com.ivy.life_and_success
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
