@@ -6,8 +6,9 @@ import './providers/auth.dart';
 import './screens/login_screen.dart';
 import './screens/sign_up_screen.dart';
 import './screens/welcome_screen.dart';
+import './screens/mainpage_screen.dart';
 
-import './widgets/background_with_footers.dart';
+import './components/background_with_footers.dart';
 
 void main() => runApp(MyApp());
 
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         routes: {
           WelcomeScreen.routeName: (_) => WelcomeScreen(),
           RecoverPasswordScreen.routeName: (_)=> RecoverPasswordScreen(),
+          MainpageScreen.routeName:(_)=>MainpageScreen(),
         },
       ),
     );
@@ -64,12 +66,7 @@ class Checker extends StatelessWidget {
         } else if (snapshot.data == null) {
           return MyHomePage();
         }
-        return Material(
-          child: RaisedButton(
-            onPressed: () => Provider.of<Auth>(context, listen: false).logOut(),
-            child: Text('Log out'),
-          ),
-        );
+        return MainpageScreen();
       },
     );
   }

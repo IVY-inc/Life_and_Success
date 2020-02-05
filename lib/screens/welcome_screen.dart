@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/welcome_widget_0.dart';
-import '../widgets/welcome_widget_1.dart';
-import '../widgets/welcome_widget_2.dart';
-import '../widgets/background_with_footers.dart';
+import './mainpage_screen.dart';
+import '../components/welcome_widgets/welcome_widget_0.dart';
+import '../components/welcome_widgets/welcome_widget_1.dart';
+import '../components/welcome_widgets/welcome_widget_2.dart';
+import '../components/background_with_footers.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const routeName = '/welcome';
@@ -13,19 +14,26 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   int _currentPage = 0;
-
+  PageController _pageController;
+  @override
+  void initState() {
+    _pageController =PageController(
+      initialPage: 0,
+      keepPage: true,
+    );
+    super.initState();
+  }
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     final mediaquery = MediaQuery.of(context);
 
     //Height of the container occupied by the image which is half of the screen
     final imageSize = mediaquery.size.height / 2;
-
-    //pageController to allow jumping of pages
-    final _pageController = PageController(
-      initialPage: 0,
-      keepPage: true,
-    );
 
     ///called when [icon] arrow_back is pressed on screens 1 and 2
     void _movePageBackwards() {
@@ -65,7 +73,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           duration: Duration(milliseconds: 150),
         );
       } else {
-        //...
+        Navigator.of(context).popAndPushNamed(MainpageScreen.routeName);
       }
     }
 

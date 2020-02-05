@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 class WelcomeWidget1 extends StatelessWidget {
-  double height;
+  final double h;
   final Function back;
-  WelcomeWidget1(this.height, this.back);
+  WelcomeWidget1(this.h, this.back);
   @override
   Widget build(BuildContext context) {
+  double height = h;
     final appBar = AppBar(
       elevation: 0,
       leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: back),

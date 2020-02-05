@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:life_and_success/models/auth_error.dart';
-import 'package:life_and_success/widgets/background_with_footers.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+
 import '../providers/auth.dart';
+import './mainpage_screen.dart';
+import '../components/background_with_footers.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -205,8 +206,7 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
         try {
           await Provider.of<Auth>(context, listen: false)
               .recoverPassword(email: _textController.text);
-          Navigator.of(context).popAndPushNamed('');
-          //TODO: Login from here
+          Navigator.of(context).popAndPushNamed(MainpageScreen.routeName); 
         } catch (e) {
           showDialog(
             context: context,
