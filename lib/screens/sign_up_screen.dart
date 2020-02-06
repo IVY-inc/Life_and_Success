@@ -4,11 +4,7 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import '../providers/auth.dart';
 import './welcome_screen.dart';
-
-enum Gender {
-  Male,
-  Female,
-}
+import '../models/constants.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -231,8 +227,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         });
                         try {
                           await Provider.of<Auth>(context, listen: false)
-                              .signUp(_emailController.text,
-                                  _passwordController.text);
+                              .signUp(
+                            _emailController.text,
+                            _passwordController.text,
+                            _selectedGender,
+                          );
                         } catch (e) {
                           print(e);
                         }

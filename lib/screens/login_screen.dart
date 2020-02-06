@@ -175,7 +175,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return ModalProgressHUD(child: screen, inAsyncCall: _isLoading);
   }
 }
-
+///[EXTRA SCREEN HERE]
+///
+///
+///
 class RecoverPasswordScreen extends StatefulWidget {
   static const routeName = 'password-recover';
 
@@ -259,3 +262,6 @@ class _RecoverPasswordScreenState extends State<RecoverPasswordScreen> {
     );
   }
 }
+///Two classes are available in this screen
+///1. LoginScreen()
+///2. ForgotPasswordScreen()

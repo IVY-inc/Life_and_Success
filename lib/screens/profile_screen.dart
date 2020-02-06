@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth.dart';
+import './profile/edit_profile_screen.dart';
+import '../models/constants.dart';
 
 class ProfileItem {
   final String title;
@@ -26,36 +28,24 @@ class ProfileScreen extends StatelessWidget {
       @required bool hasHeader,
       String header,
       List<ProfileItem> items}) {
-    return Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-      if (hasHeader)
-        Container(
-          padding: EdgeInsets.only(left: 16, top: 8),
-          alignment: Alignment.centerLeft,
-          child: Text(
-            header.toUpperCase(),
-            textAlign: TextAlign.left,
-            style: TextStyle(color: Colors.grey, fontSize: 10),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if (hasHeader)
+          Container(
+            padding: EdgeInsets.only(left: 16, top: 8),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              header.toUpperCase(),
+              textAlign: TextAlign.left,
+              style: TextStyle(color: Colors.grey, fontSize: 10),
+            ),
           ),
-        ),
-      for (int i = 0; i < items.length; i++)
-        i == items.length - 1
-            ? ListTile(
-                title: Text(items[i].title),
-                subtitle:
-                    items[i].subTitle == null ? null : Text(items[i].subTitle),
-                onTap: items[i].onClick,
-                leading: items[i].isIcon
-                    ? Icon(
-                        items[i].icon,
-                        color: Colors.black,
-                      )
-                    : CircleAvatar(
-                        backgroundImage: NetworkImage(items[i].imageUrl),
-                      ),
-              )
-            : Column(children: [
-                ListTile(
-                  title: Text(items[i].title),
+        for (int i = 0; i < items.length; i++)
+          i == items.length - 1
+              ? ListTile(
+                  title: items[i].title == null
+                      ? null:Text(items[i].title),
                   subtitle: items[i].subTitle == null
                       ? null
                       : Text(items[i].subTitle),
@@ -65,28 +55,40 @@ class ProfileScreen extends StatelessWidget {
                           items[i].icon,
                           color: Colors.black,
                         )
-                      : Hero(
-                          tag: 'profilepic',
-                          child: CircleAvatar(
-                            backgroundImage: NetworkImage(items[i].imageUrl),
-                          ),
+                      : CircleAvatar(
+                          backgroundImage: NetworkImage(items[i].imageUrl),
                         ),
+                )
+              : Column(
+                  children: [
+                    ListTile(
+                      title: Text(items[i].title),
+                      subtitle: items[i].subTitle == null
+                          ? null
+                          : Text(items[i].subTitle),
+                      onTap: items[i].onClick,
+                      leading: items[i].isIcon
+                          ? Icon(
+                              items[i].icon,
+                              color: Colors.black,
+                            )
+                          : Hero(
+                              tag: 'profilepic',
+                              child: CircleAvatar(
+                                backgroundImage:
+                                    NetworkImage(items[i].imageUrl),
+                              ),
+                            ),
+                    ),
+                    Divider(),
+                  ],
                 ),
-                Divider(),
-              ]),
-      // ...items.map((i) => Column(children: [
-      //         ListTile(title: Text(i.title),
-      //           subtitle: i.subTitle == null ? null : Text(i.subTitle),
-      //           onTap: i.onClick, leading:
-      // i.isIcon
-      //? Icon(i.icon,color: Colors.black,)
-      // : CircleAvatar(backgroundImage: NetworkImage(i.imageUrl),),),
-      //         Divider(),
-      //       ]),
-      //     )
-      //     .toList(),
-    ]);
+      ],
+    );
   }
+  //Function sections[to handle the numerous onClicks from each View]
+  //
+  //
 
   @override
   Widget build(BuildContext context) {
@@ -100,9 +102,8 @@ class ProfileScreen extends StatelessWidget {
             items: [
               ProfileItem(
                 isIcon: false,
-                imageUrl: auth.user.photoUrl ??
-                    'https://www.pngitem.com/pimgs/m/506-5067022_sweet-shap-profile-placeholder-hd-png-download.png',
-                title: auth.user.displayName == ''
+                imageUrl: auth.user.photoUrl ?? kProfileImage,
+                title: auth.user.displayName == ''||auth.user.displayName==null
                     ? auth.user.email.substring(
                         0,
                         min(
@@ -112,7 +113,8 @@ class ProfileScreen extends StatelessWidget {
                       )
                     : auth.user.displayName,
                 subTitle: auth.user.email,
-                onClick: () {},
+                onClick: () => Navigator.of(context)
+                    .pushNamed(EditProfileScreen.routeName),
               )
             ],
           ),

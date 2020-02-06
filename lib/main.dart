@@ -7,6 +7,7 @@ import './screens/login_screen.dart';
 import './screens/sign_up_screen.dart';
 import './screens/welcome_screen.dart';
 import './screens/mainpage_screen.dart';
+import './screens/profile/edit_profile_screen.dart';
 
 import './components/background_with_footers.dart';
 
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
           WelcomeScreen.routeName: (_) => WelcomeScreen(),
           RecoverPasswordScreen.routeName: (_)=> RecoverPasswordScreen(),
           MainpageScreen.routeName:(_)=>MainpageScreen(),
+          EditProfileScreen.routeName:(_)=>EditProfileScreen(),
         },
       ),
     );
