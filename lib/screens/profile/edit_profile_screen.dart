@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -17,8 +18,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isLoading = false;
   final GlobalKey<FormState> _formKey = GlobalKey();
 
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
   @override
   void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -77,6 +82,49 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     Navigator.of(context).pop();
   }
 
+  Widget radioButton(Gender value) {
+    return Expanded(
+      child: RadioListTile(
+        title: Text(value.toString().split('.')[1]),
+        value: value,
+        groupValue: _gender,
+        onChanged: (gen) => setState(
+          () {
+            _gender = gen;
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget textFormField(
+      {TextEditingController controller,
+      @required IconData icon,
+      Function validator,
+      String labelText}) {
+    return Row(
+      children: <Widget>[
+        Icon(icon, size: 36),
+        Expanded(
+          child: TextFormField(
+            validator: validator,
+            controller: controller,
+            decoration: InputDecoration(
+              labelText: labelText,
+              labelStyle: TextStyle(color: Colors.black),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2),
+                  borderRadius: BorderRadius.circular(4)),
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 2),
+                  borderRadius: BorderRadius.circular(4)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaquery = MediaQuery.of(context);
@@ -115,8 +163,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Form(
               key: _formKey,
               child: Consumer<Auth>(builder: (_, auth, __) {
+                //get the display Name.. if this is the first time.. help the user get a displayName
+                _usernameController.text =
+                    auth.user.displayName == null || auth.user.displayName == ''
+                        ? auth.user.email.substring(
+                            0,
+                            min(
+                              auth.user.email.indexOf('.'),
+                              auth.user.email.indexOf('@'),
+                            ),
+                          )
+                        : auth.user.displayName;
+
                 return Padding(
-                  padding: const EdgeInsets.all(10.0),
+                  padding: const EdgeInsets.all(24.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -137,84 +197,64 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         onPressed: () {},
                       ),
                       SizedBox(height: 30),
-                      InputDecorator(
-                        child: Text(auth.user.email),
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          enabled: false,
-                          border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 2),
-                              borderRadius: BorderRadius.circular(4)),
-                        ),
+                      Row(
+                        children: <Widget>[
+                          Icon(
+                            Icons.mail,
+                            size: 36,
+                          ),
+                          Expanded(
+                            child: InputDecorator(
+                              child: Text(auth.user.email),
+                              decoration: InputDecoration(
+                                labelText: 'Email',
+                                enabled: false,
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.grey, width: 2),
+                                    borderRadius: BorderRadius.circular(4)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 30),
-                      TextFormField(
+                      textFormField(
+                        icon: Icons.person,
                         validator: (val) {
+                          if (val.length < 4) {
+                            return 'Username too short';
+                          }
                           return null;
                         },
-                        decoration: InputDecoration(
-                          labelText: 'Old Password',
-                          labelStyle: TextStyle(color: Colors.black),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.blue, width: 2),
-                              borderRadius: BorderRadius.circular(4)),
-                          border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 2),
-                              borderRadius: BorderRadius.circular(4)),
-                        ),
+                        controller: _usernameController,
+                        labelText: 'Username',
                       ),
                       SizedBox(height: 30),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'New Password',
-                          labelStyle: TextStyle(color: Colors.black),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.blue, width: 2),
-                              borderRadius: BorderRadius.circular(4)),
-                          border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 2),
-                              borderRadius: BorderRadius.circular(4)),
-                        ),
+                      textFormField(
+                        validator: (value) {
+                          if (value.length <= 6) {
+                            return 'Password is not strong enough';
+                          }
+                          return null;
+                        },
+                        icon: Icons.lock,
+                        controller: _passwordController,
+                        labelText: 'New Password',
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: RadioListTile(
-                                title: Text('Male'),
-                                value: Gender.Male,
-                                groupValue: _gender,
-                                onChanged: (gen) {
-                                  setState(() {
-                                    _gender = gen;
-                                  });
-                                },
-                              ),
-                            ),
-                            Expanded(
-                              child: RadioListTile(
-                                title: Text('Female'),
-                                value: Gender.Female,
-                                groupValue: _gender,
-                                onChanged: (gen) => setState(
-                                  () {
-                                    _gender = gen;
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          radioButton(Gender.Male),
+                          radioButton(Gender.Female),
+                        ],
                       ),
-                      RaisedButton(
-                        child: Text('Save'.toUpperCase()),
-                        onPressed: () => updateProfile(context),
+                      Container(
+                        width: double.infinity,
+                        child: RaisedButton(
+                          child: Text('Save'.toUpperCase()),
+                          onPressed: () => updateProfile(context),
+                        ),
                       ),
                     ],
                   ),

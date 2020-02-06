@@ -47,22 +47,27 @@ class _MainpageScreenState extends State<MainpageScreen> {
           selectedIndex: _selectedIndex,
           items: [
             BottomNavyBarItem(
+              activeColor: Theme.of(context).accentColor,
               title: Text('Home'),
               icon: Icon(Icons.web),
             ),
             BottomNavyBarItem(
+              activeColor: Theme.of(context).accentColor,
               title: Text('Explore'),
               icon: Icon(Icons.search),
             ),
             BottomNavyBarItem(
+              activeColor: Theme.of(context).accentColor,
               title: Text('Music'),
               icon: Icon(Icons.library_music),
             ),
             BottomNavyBarItem(
+              activeColor: Theme.of(context).accentColor,
               title: Text('Planner'),
               icon: Icon(Icons.av_timer),
             ),
             BottomNavyBarItem(
+              activeColor: Theme.of(context).accentColor,
               title: Text('Profile'),
               icon: Icon(Icons.person),
             ),

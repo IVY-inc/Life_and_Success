@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Life and Success',
         theme: ThemeData(
-            primaryColor: Colors.white,
+            primaryColor:Colors.white,
             accentColor: Colors.black,
             buttonTheme: ButtonThemeData(
               buttonColor: Colors.black,
