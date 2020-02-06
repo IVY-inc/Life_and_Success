@@ -36,20 +36,43 @@ class SliverTitleDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  SliverPersistentHeader makeHeader(String headerTitle) {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  ScrollController _scrollController = ScrollController();
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  SliverPersistentHeader makeHeader(String headerTitle, int val) {
+    double offset = 0.0;
+    for (int i = 0; i < val; i++) {
+      if (i == 0) {
+        offset += 360;
+      } else
+        offset += 238;
+    }
     return SliverPersistentHeader(
       pinned: true,
       delegate: SliverTitleDelegate(
         maxHeight: 30,
         minHeight: 20,
-        child: Container(
-          color:Colors.white,
-          child: Text(
-            headerTitle,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+        child: GestureDetector(
+          onTap: () => _scrollController.animateTo(offset,
+              duration: Duration(milliseconds: 300), curve: Curves.ease),
+          child: Container(
+            color: Colors.white,
+            child: Text(
+              headerTitle,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -63,15 +86,15 @@ class HomeScreen extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: <Widget>[
             SliverAppBar(
               centerTitle: true,
               title: Text('Life and Success'),
-              //pinned: true,
-              floating: true,
+              pinned: true,
             ),
             for (int i = 0; i < sections.length; i++) ...[
-              makeHeader(sections[i]),
+              makeHeader(sections[i], i),
               SliverGrid.count(
                 crossAxisCount: 3,
                 mainAxisSpacing: 12,
@@ -84,8 +107,8 @@ class HomeScreen extends StatelessWidget {
                     )
                     .toList(),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate([SizedBox(height: 8)]),
+              SliverToBoxAdapter(
+                child: SizedBox(height: 8),
               ),
             ],
           ],

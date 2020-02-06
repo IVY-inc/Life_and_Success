@@ -34,7 +34,7 @@ class _MainpageScreenState extends State<MainpageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
+      body: PageView.builder(itemCount: 5,
         onPageChanged: (index) => setState(() {
           _selectedIndex = index;
           _pageController.animateToPage(index,

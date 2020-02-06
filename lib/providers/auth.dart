@@ -7,10 +7,13 @@ class Auth extends ChangeNotifier {
   FirebaseUser _user;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<FirebaseUser> getUser() {
-    return _auth.currentUser();
+  Future<FirebaseUser> getUser() async{
+    _user = await _auth.currentUser();
+    return _user;
   }
-
+  FirebaseUser get user{
+    return _user;
+  }
   //Sign user up
   Future<void> signUp(String email, String password) async {
     try {
