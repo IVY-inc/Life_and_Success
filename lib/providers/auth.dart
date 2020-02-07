@@ -1,4 +1,8 @@
+import 'dart:io';
+import 'dart:developer';
+import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -7,53 +11,83 @@ import '../models/constants.dart';
 
 class Auth extends ChangeNotifier {
   FirebaseUser _user;
+  final StorageReference storageReference =
+      FirebaseStorage().ref().child("users_dp");
   final Firestore _db = Firestore();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<FirebaseUser> getUser() async{
+  Future<FirebaseUser> getUser() async {
     _user = await _auth.currentUser();
     return _user;
   }
-  FirebaseUser get user{
+
+  FirebaseUser get user {
     return _user;
   }
 
-  Future<Gender> getUserGender() async{
-   final gender = await _db.collection("users").document(_user.uid).get().then((snapshot)=>snapshot['gender']);
-   if(gender==1){
-     return Gender.Female;
-   }else{
-     return Gender.Male;
-   }
+  Future<Gender> getUserGender() async {
+    final gender = await _db
+        .collection("users")
+        .document(_user.uid)
+        .get()
+        .then((snapshot) => snapshot['gender']);
+    if (gender == 1) {
+      return Gender.Female;
+    } else {
+      return Gender.Male;
+    }
   }
-  Future<void> setUserGender(Gender g) async{
+
+  Future<void> setUserGender(Gender g) async {
     int genderCode = 0;
-    if(g==Gender.Female){
+    if (g == Gender.Female) {
       genderCode = 1;
     }
-    try{
-    await _db.collection("users").document(_user.uid).setData({'gender':genderCode});
-    }catch(e){
+    try {
+      await _db
+          .collection("users")
+          .document(_user.uid)
+          .setData({'gender': genderCode});
+    } catch (e) {
       print(e);
     }
   }
 
-  Future<void> updateUsername(String username) async{
-    UserUpdateInfo update = UserUpdateInfo();
+  Future<void> uploadProfilepic(File imageFile) async {
     try{
-    update.displayName = username;
+    StorageReference imageUrl = storageReference
+        .child("${_user.uid}.${path.extension(imageFile.path)}");
+        
+    StorageUploadTask upload = imageUrl.putFile(imageFile);
+    await upload.onComplete; //Upload completed
+    String url = await imageUrl.getDownloadURL(); 
+    log(url);
+    //Save the url to the user auth
+    UserUpdateInfo update = UserUpdateInfo();
+    update.photoUrl = url;
     await _user.updateProfile(update);
     }catch(e){
+      log(e);
+    }
+  }
+
+  Future<void> updateUsername(String username) async {
+    UserUpdateInfo update = UserUpdateInfo();
+    try {
+      update.displayName = username;
+      await _user.updateProfile(update);
+    } catch (e) {
       print(e);
     }
   }
+
   //Sign user up
   Future<void> signUp(String email, String password, Gender g) async {
     try {
       final authResult = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       _user = authResult.user;
-      if(_user!=null){
+      if (_user != null) {
         setUserGender(g);
       }
       notifyListeners();
@@ -63,7 +97,7 @@ class Auth extends ChangeNotifier {
   }
 
   //Recover password
-  Future<void> recoverPassword({String email}) async{
+  Future<void> recoverPassword({String email}) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
     } catch (e) {

@@ -1,8 +1,11 @@
 import 'dart:math';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../../providers/auth.dart';
 
 import '../../models/constants.dart';
@@ -14,6 +17,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  File _pickedImage;
   Gender _gender;
   Gender _remoteGender;
   bool _isLoading = false;
@@ -54,17 +58,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (!_formKey.currentState.validate()) {
       return;
     }
+    final authProvider = Provider.of<Auth>(context, listen: false);
     setState(() {
       _isLoading = true;
     });
     //TODO: Error handlings
-    if (_usernameController.text !=
-        Provider.of<Auth>(context, listen: false).user.displayName) {
-      Provider.of<Auth>(context, listen: false)
-          .updateUsername(_usernameController.text);
+    if (_usernameController.text != authProvider.user.displayName) {
+      authProvider.updateUsername(_usernameController.text);
     }
     if (_gender != _remoteGender) {
-      await Provider.of<Auth>(context, listen: false).setUserGender(_gender);
+      await authProvider.setUserGender(_gender);
+    }
+    if (_pickedImage != null) {
+      await authProvider.uploadProfilepic(_pickedImage);
     }
     setState(() {
       _isLoading = false;
@@ -153,6 +159,55 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+//ModalBottom Sheet creater.. Because of this the image File has to be somewhere outside our EditProfile class so
+//_image can be callable from outside the class.. wait.. I am thinking of something.. what if we use {static call?}
+  Widget imageOptions(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.camera),
+                  onPressed: () async {
+                    File imageFile = await ImagePicker.pickImage(
+                      source: ImageSource.camera,
+                    );
+                    Navigator.of(context).pop(imageFile);
+                  }),
+              Text('Camera')
+            ],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              IconButton(
+                  icon: Icon(Icons.photo_library),
+                  onPressed: () async {
+                    File image = await ImagePicker.pickImage(
+                      source: ImageSource.gallery,
+                    );
+                    Navigator.of(context).pop(image);
+                  }),
+              Text('Gallery')
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void pickImageModalSheet() async {
+    _pickedImage = await showModalBottomSheet<File>(
+        context: context, builder: (ctx) => imageOptions(ctx));
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaquery = MediaQuery.of(context);
@@ -206,6 +261,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   doneB = true;
                 }
 
+                ///*******View Head [THIS] is where the UI starts.. I am tired of scrolling lol but this is one busy screen though */
                 return Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
@@ -223,13 +279,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           child: CircleAvatar(
                             minRadius: 30,
                             maxRadius: mediaquery.size.width * 0.3,
-                            backgroundImage: imageProvider,
+                            backgroundImage: _pickedImage == null
+                                ? imageProvider
+                                : FileImage(_pickedImage),
                           ),
                         ),
                       ),
-                      FlatButton(
-                        child: Text('UPLOAD PICTURE'),
-                        onPressed: () {},
+                      Builder(
+                        builder: (ctx) => FlatButton(
+                          textColor: Theme.of(context).accentColor,
+                          child: Text('UPLOAD PICTURE'),
+                          onPressed: pickImageModalSheet,
+                        ),
                       ),
                       SizedBox(height: 20),
                       Row(
