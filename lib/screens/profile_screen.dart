@@ -214,7 +214,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           ProfileItem(
             title: 'Policies',
-            icon: Icons.person,
+            icon: Icons.verified_user,
             onClick: () {},
           ),
         ],

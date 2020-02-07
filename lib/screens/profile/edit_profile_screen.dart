@@ -16,14 +16,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Gender _gender;
   Gender _remoteGender;
   bool _isLoading = false;
+  bool doneB = false;
   final GlobalKey<FormState> _formKey = GlobalKey();
 
   final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
   @override
   void dispose() {
     _usernameController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -49,37 +48,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _isLoading = true;
     });
     //TODO: Error handlings
+    if (_usernameController.text !=
+        Provider.of<Auth>(context, listen: false).user.displayName) {
+      Provider.of<Auth>(context,listen:false).updateUsername(_usernameController.text);
+    }
     if (_gender != _remoteGender) {
-      await Provider.of<Auth>(context).setUserGender(_gender);
+      await Provider.of<Auth>(context, listen: false).setUserGender(_gender);
     }
     setState(() {
       _isLoading = false;
     });
-    await showDialog(
+    showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.warning, color: Colors.red),
-            SizedBox(width: 20),
-            Text('Warning'),
+            Icon(errorOccured ? Icons.warning : Icons.verified_user,
+                color: errorOccured ? Colors.red : Colors.green, size: 36),
+            SizedBox(width: 10),
+            Text(errorOccured ? 'Warning' : 'Success'),
           ],
         ),
-        content: Text(
-            'Are you sure you want to leave this page without saving changes?'),
+        content: Text(errorOccured
+            ? 'An error occured while updating profile'
+            : 'Profile successfully updated!'),
         actions: <Widget>[
+          if (errorOccured)
+            FlatButton(
+              child: Text('Retry'),
+              color: Colors.green,
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                updateProfile(context);
+              },
+            ),
           FlatButton(
-              child: Text('Yes'),
-              onPressed: () => Navigator.of(context).pop(true)),
-          RaisedButton(
-            color: Colors.black,
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('No'),
+            onPressed: () => Navigator.of(ctx).pop(),
+            color: Colors.red,
+            child: Text('Close'),
           ),
         ],
       ),
     );
-    Navigator.of(context).pop();
   }
 
   Widget radioButton(Gender value) {
@@ -164,16 +174,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               key: _formKey,
               child: Consumer<Auth>(builder: (_, auth, __) {
                 //get the display Name.. if this is the first time.. help the user get a displayName
-                _usernameController.text =
-                    auth.user.displayName == null || auth.user.displayName == ''
-                        ? auth.user.email.substring(
-                            0,
-                            min(
-                              auth.user.email.indexOf('.'),
-                              auth.user.email.indexOf('@'),
-                            ),
-                          )
-                        : auth.user.displayName;
+                if (!doneB) {
+                  _usernameController.text = auth.user.displayName == null ||
+                          auth.user.displayName == ''
+                      ? auth.user.email.substring(
+                          0,
+                          min(
+                            auth.user.email.indexOf('.'),
+                            auth.user.email.indexOf('@'),
+                          ),
+                        )
+                      : auth.user.displayName;
+                  doneB = true;
+                }
 
                 return Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -196,7 +209,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         child: Text('UPLOAD PICTURE'),
                         onPressed: () {},
                       ),
-                      SizedBox(height: 30),
+                      SizedBox(height: 20),
                       Row(
                         children: <Widget>[
                           Icon(
@@ -218,7 +231,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 30),
+                      SizedBox(height: 40),
                       textFormField(
                         icon: Icons.person,
                         validator: (val) {
@@ -230,18 +243,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         controller: _usernameController,
                         labelText: 'Username',
                       ),
-                      SizedBox(height: 30),
-                      textFormField(
-                        validator: (value) {
-                          if (value.length <= 6) {
-                            return 'Password is not strong enough';
-                          }
-                          return null;
-                        },
-                        icon: Icons.lock,
-                        controller: _passwordController,
-                        labelText: 'New Password',
-                      ),
+                      SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
@@ -249,6 +251,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           radioButton(Gender.Female),
                         ],
                       ),
+                      SizedBox(height: 20),
                       Container(
                         width: double.infinity,
                         child: RaisedButton(

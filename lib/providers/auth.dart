@@ -31,7 +31,21 @@ class Auth extends ChangeNotifier {
     if(g==Gender.Female){
       genderCode = 1;
     }
+    try{
     await _db.collection("users").document(_user.uid).setData({'gender':genderCode});
+    }catch(e){
+      print(e);
+    }
+  }
+
+  Future<void> updateUsername(String username) async{
+    UserUpdateInfo update = UserUpdateInfo();
+    try{
+    update.displayName = username;
+    await _user.updateProfile(update);
+    }catch(e){
+      print(e);
+    }
   }
   //Sign user up
   Future<void> signUp(String email, String password, Gender g) async {
