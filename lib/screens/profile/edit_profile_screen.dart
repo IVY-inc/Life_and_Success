@@ -26,16 +26,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
-  @override
-  void initState() {
+  setGender() async {
     try {
-      Provider.of<Auth>(context, listen: false).getUserGender().then((g) {
+      _isLoading = true;
+      await Provider.of<Auth>(context, listen: false).getUserGender().then((g) {
         _remoteGender = g;
         _gender = g;
+      }).then((_) {
+        setState(() {
+          _isLoading = false;
+        });
       });
     } catch (e) {
       print(e);
     }
+  }
+
+  @override
+  void initState() {
+    setGender();
     super.initState();
   }
 
@@ -50,7 +59,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     //TODO: Error handlings
     if (_usernameController.text !=
         Provider.of<Auth>(context, listen: false).user.displayName) {
-      Provider.of<Auth>(context,listen:false).updateUsername(_usernameController.text);
+      Provider.of<Auth>(context, listen: false)
+          .updateUsername(_usernameController.text);
     }
     if (_gender != _remoteGender) {
       await Provider.of<Auth>(context, listen: false).setUserGender(_gender);
@@ -58,7 +68,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() {
       _isLoading = false;
     });
-    showDialog(
+    await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Row(
@@ -83,13 +93,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               },
             ),
           FlatButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            color: Colors.red,
+            onPressed: () {
+              errorOccured
+                  ? Navigator.of(ctx).pop()
+                  : Navigator.of(context).pop(true);
+            },
+            textColor: Colors.red,
             child: Text('Close'),
           ),
         ],
       ),
     );
+    if (!errorOccured) {
+      Navigator.of(context).pop();
+    }
   }
 
   Widget radioButton(Gender value) {

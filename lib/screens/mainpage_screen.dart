@@ -8,15 +8,26 @@ import './home_screen.dart';
 import './planner_screen.dart';
 import './profile_screen.dart';
 
+
+int value = 0;
+
+
 class MainpageScreen extends StatefulWidget {
   static const routeName = '/main';
+  int getPage() {
+    return value;
+  }
+
+  void setPage(int page) {
+    value = page;
+  }
+
   @override
   _MainpageScreenState createState() => _MainpageScreenState();
 }
 
 class _MainpageScreenState extends State<MainpageScreen> {
-  final _pageController = PageController();
-  var _selectedIndex = 0;
+  PageController _pageController;
   List<Widget> pages = [
     HomeScreen(),
     ExplorerScreen(),
@@ -24,6 +35,14 @@ class _MainpageScreenState extends State<MainpageScreen> {
     PlannerScreen(),
     ProfileScreen(),
   ];
+  @override
+  void initState() {
+    _pageController = PageController(
+      keepPage: true,
+      initialPage: widget.getPage(),
+    );
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -34,9 +53,10 @@ class _MainpageScreenState extends State<MainpageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(itemCount: 5,
+      body: PageView.builder(
+        itemCount: 5,
         onPageChanged: (index) => setState(() {
-          _selectedIndex = index;
+          widget.setPage(index);
           _pageController.animateToPage(index,
               duration: Duration(milliseconds: 300), curve: Curves.ease);
         }),
@@ -44,7 +64,7 @@ class _MainpageScreenState extends State<MainpageScreen> {
         controller: _pageController,
       ),
       bottomNavigationBar: BottomNavyBar(
-          selectedIndex: _selectedIndex,
+          selectedIndex: widget.getPage(),
           items: [
             BottomNavyBarItem(
               activeColor: Theme.of(context).accentColor,
@@ -73,8 +93,8 @@ class _MainpageScreenState extends State<MainpageScreen> {
             ),
           ],
           onItemSelected: (index) => setState(() {
+                widget.setPage(index);
                 _pageController.jumpToPage(index);
-                _selectedIndex = index;
               })),
     );
   }
