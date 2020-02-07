@@ -12,6 +12,12 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>life_and_success</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select an Image</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take an Image</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Record</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

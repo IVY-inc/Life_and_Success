@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/auth.dart';
 
 import '../../models/constants.dart';
@@ -210,16 +211,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Hero(
-                        tag: 'profilepic',
-                        child: CircleAvatar(
-                          minRadius: 30,
-                          maxRadius: mediaquery.size.width * 0.3,
-                          backgroundImage: NetworkImage(
-                              auth.user.photoUrl == '' ||
-                                      auth.user.photoUrl == null
-                                  ? kProfileImage
-                                  : auth.user.photoUrl),
+                      CachedNetworkImage(
+                        imageUrl: auth.user.photoUrl == '' ||
+                                auth.user.photoUrl == null
+                            ? kProfileImage
+                            : auth.user.photoUrl,
+                        placeholder: (_, __) => CircularProgressIndicator(),
+                        errorWidget: (_, __, ___) => Icon(Icons.error),
+                        imageBuilder: (_, imageProvider) => Hero(
+                          tag: 'profilepic',
+                          child: CircleAvatar(
+                            minRadius: 30,
+                            maxRadius: mediaquery.size.width * 0.3,
+                            backgroundImage: imageProvider,
+                          ),
                         ),
                       ),
                       FlatButton(

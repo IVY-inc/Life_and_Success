@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../providers/auth.dart';
 import './profile/edit_profile_screen.dart';
@@ -28,6 +29,27 @@ class ProfileScreen extends StatelessWidget {
       @required bool hasHeader,
       String header,
       List<ProfileItem> items}) {
+    Widget listItem(int i) => ListTile(
+          title: items[i].title == null ? null : Text(items[i].title),
+          subtitle: items[i].subTitle == null ? null : Text(items[i].subTitle),
+          onTap: items[i].onClick,
+          leading: items[i].isIcon
+              ? Icon(
+                  items[i].icon,
+                  color: Colors.black,
+                )
+              : CachedNetworkImage(
+                  imageUrl: items[i].imageUrl,
+                  placeholder: (_, __) => CircularProgressIndicator(),
+                  errorWidget: (_, __, ___) => Icon(Icons.error),
+                  imageBuilder: (_, imageProvider) => Hero(
+                    tag: 'profilepic',
+                    child: CircleAvatar(
+                      backgroundImage: imageProvider,
+                    ),
+                  ),
+                ),
+        );
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -43,43 +65,10 @@ class ProfileScreen extends StatelessWidget {
           ),
         for (int i = 0; i < items.length; i++)
           i == items.length - 1
-              ? ListTile(
-                  title: items[i].title == null
-                      ? null:Text(items[i].title),
-                  subtitle: items[i].subTitle == null
-                      ? null
-                      : Text(items[i].subTitle),
-                  onTap: items[i].onClick,
-                  leading: items[i].isIcon
-                      ? Icon(
-                          items[i].icon,
-                          color: Colors.black,
-                        )
-                      : CircleAvatar(
-                          backgroundImage: NetworkImage(items[i].imageUrl),
-                        ),
-                )
+              ? listItem(i)
               : Column(
                   children: [
-                    ListTile(
-                      title: Text(items[i].title),
-                      subtitle: items[i].subTitle == null
-                          ? null
-                          : Text(items[i].subTitle),
-                      onTap: items[i].onClick,
-                      leading: items[i].isIcon
-                          ? Icon(
-                              items[i].icon,
-                              color: Colors.black,
-                            )
-                          : Hero(
-                              tag: 'profilepic',
-                              child: CircleAvatar(
-                                backgroundImage:
-                                    NetworkImage(items[i].imageUrl),
-                              ),
-                            ),
-                    ),
+                    listItem(i),
                     Divider(),
                   ],
                 ),
@@ -103,15 +92,16 @@ class ProfileScreen extends StatelessWidget {
               ProfileItem(
                 isIcon: false,
                 imageUrl: auth.user.photoUrl ?? kProfileImage,
-                title: auth.user.displayName == ''||auth.user.displayName==null
-                    ? auth.user.email.substring(
-                        0,
-                        min(
-                          auth.user.email.indexOf('.'),
-                          auth.user.email.indexOf('@'),
-                        ),
-                      )
-                    : auth.user.displayName,
+                title:
+                    auth.user.displayName == '' || auth.user.displayName == null
+                        ? auth.user.email.substring(
+                            0,
+                            min(
+                              auth.user.email.indexOf('.'),
+                              auth.user.email.indexOf('@'),
+                            ),
+                          )
+                        : auth.user.displayName,
                 subTitle: auth.user.email,
                 onClick: () => Navigator.of(context)
                     .pushNamed(EditProfileScreen.routeName),
@@ -222,7 +212,7 @@ class ProfileScreen extends StatelessWidget {
       section(
         hasHeader: false,
         items: [
-          ProfileItem(title: 'Logout', onClick: () {}, icon: Icons.person),
+          ProfileItem(title: 'Logout', onClick: () {}, icon: Icons.exit_to_app),
         ],
       )
     ];
