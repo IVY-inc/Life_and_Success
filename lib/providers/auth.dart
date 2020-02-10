@@ -56,7 +56,7 @@ class Auth extends ChangeNotifier {
   Future<void> uploadProfilepic(File imageFile) async {
     try{
     StorageReference imageUrl = storageReference
-        .child("${_user.uid}.${path.extension(imageFile.path)}");
+        .child("${_user.uid}${path.extension(imageFile.path)}");
         
     StorageUploadTask upload = imageUrl.putFile(imageFile);
     await upload.onComplete; //Upload completed

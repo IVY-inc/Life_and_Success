@@ -163,7 +163,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 //_image can be callable from outside the class.. wait.. I am thinking of something.. what if we use {static call?}
   Widget imageOptions(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 40),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
