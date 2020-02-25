@@ -8,9 +8,7 @@ import './home_screen.dart';
 import './planner_screen.dart';
 import './profile_screen.dart';
 
-
 int value = 0;
-
 
 class MainpageScreen extends StatefulWidget {
   static const routeName = '/main';
@@ -53,15 +51,17 @@ class _MainpageScreenState extends State<MainpageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
-        itemCount: 5,
-        onPageChanged: (index) => setState(() {
-          widget.setPage(index);
-          _pageController.animateToPage(index,
-              duration: Duration(milliseconds: 300), curve: Curves.ease);
-        }),
-        itemBuilder: (ctx, index) => pages[index],
-        controller: _pageController,
+      body: SafeArea(
+        child: PageView.builder(
+          itemCount: 5,
+          onPageChanged: (index) => setState(() {
+            widget.setPage(index);
+            _pageController.animateToPage(index,
+                duration: Duration(milliseconds: 300), curve: Curves.ease);
+          }),
+          itemBuilder: (ctx, index) => pages[index],
+          controller: _pageController,
+        ),
       ),
       bottomNavigationBar: BottomNavyBar(
           selectedIndex: widget.getPage(),

@@ -229,6 +229,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: Text('Yes'),
                 onPressed: () => Navigator.of(context).pop(true)),
             RaisedButton(
+              //TODO: try to add padding to this button.. it looks like screp
               color: Colors.black,
               onPressed: () => Navigator.of(context).pop(false),
               child: Text('No'),

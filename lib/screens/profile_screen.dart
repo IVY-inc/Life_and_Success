@@ -114,7 +114,12 @@ class ProfileScreen extends StatelessWidget {
         hasHeader: true,
         header: 'account',
         items: [
-          ProfileItem(title: 'My Profile', icon: Icons.person, onClick: () {}),
+          ProfileItem(
+            title: 'My Profile',
+            icon: Icons.person,
+            onClick: () =>
+                Navigator.of(context).pushNamed(EditProfileScreen.routeName),
+          ),
           ProfileItem(
               title: 'My Progress and rewards',
               icon: Icons.pie_chart,
@@ -212,7 +217,10 @@ class ProfileScreen extends StatelessWidget {
       section(
         hasHeader: false,
         items: [
-          ProfileItem(title: 'Logout', onClick: () {}, icon: Icons.exit_to_app),
+          ProfileItem(
+              title: 'Logout',
+              onClick: () => Provider.of<Auth>(context, listen: false).logOut(),
+              icon: Icons.exit_to_app),
         ],
       )
     ];
