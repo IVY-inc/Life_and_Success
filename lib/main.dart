@@ -6,8 +6,10 @@ import './providers/auth.dart';
 import './screens/login_screen.dart';
 import './screens/sign_up_screen.dart';
 import './screens/welcome_screen.dart';
+import './screens/explore_screen.dart';
 import './screens/mainpage_screen.dart';
 import './screens/profile/edit_profile_screen.dart';
+import './screens/explore/goal_planner_screen.dart';
 
 import './components/background_with_footers.dart';
 
@@ -22,7 +24,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Life and Success',
         theme: ThemeData(
-            primaryColor:Colors.white,
+            primaryColor: Colors.white,
             accentColor: Colors.black,
             buttonTheme: ButtonThemeData(
               buttonColor: Colors.black,
@@ -42,9 +44,11 @@ class MyApp extends StatelessWidget {
         home: Checker(),
         routes: {
           WelcomeScreen.routeName: (_) => WelcomeScreen(),
-          RecoverPasswordScreen.routeName: (_)=> RecoverPasswordScreen(),
-          MainpageScreen.routeName:(_)=>MainpageScreen(),
-          EditProfileScreen.routeName:(_)=>EditProfileScreen(),
+          RecoverPasswordScreen.routeName: (_) => RecoverPasswordScreen(),
+          MainpageScreen.routeName: (_) => MainpageScreen(),
+          ExplorerScreen.routeName: (_) => ExplorerScreen(),
+          GoalPlannerScreen.routeName: (_) => GoalPlannerScreen(),
+          EditProfileScreen.routeName: (_) => EditProfileScreen(),
         },
       ),
     );

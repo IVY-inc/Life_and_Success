@@ -25,10 +25,13 @@ class MainpageScreen extends StatefulWidget {
 }
 
 class _MainpageScreenState extends State<MainpageScreen> {
-  PageController _pageController;
+  static PageController _pageController;
+  static String payloa;
   List<Widget> pages = [
-    HomeScreen(),
-    ExplorerScreen(),
+    HomeScreen(
+      gridClickHandle: gridItemClickHandle,
+    ),
+    ExplorerScreen(payload: payloa),
     MusicScreen(),
     PlannerScreen(),
     ProfileScreen(),
@@ -42,10 +45,12 @@ class _MainpageScreenState extends State<MainpageScreen> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+  static void gridItemClickHandle({String payload, bool isExplorer}) {
+    payloa = payload;
+    if (isExplorer) {
+      _pageController.animateToPage(1,
+          duration: Duration(milliseconds: 300), curve: Curves.ease);
+    }
   }
 
   @override

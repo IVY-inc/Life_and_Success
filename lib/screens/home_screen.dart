@@ -37,6 +37,8 @@ class SliverTitleDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class HomeScreen extends StatefulWidget {
+  final Function gridClickHandle;
+  HomeScreen({this.gridClickHandle});
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -103,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     .map(
                       (str) => HomepageGrid(
                         text: str,
+                        gridClickHandle: widget.gridClickHandle,
                       ),
                     )
                     .toList(),
