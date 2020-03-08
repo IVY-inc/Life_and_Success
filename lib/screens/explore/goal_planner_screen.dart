@@ -1,63 +1,152 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
+enum GoalType { Short, Long }
+
 class GoalPlannerScreen extends StatelessWidget {
+  final Function back;
+  GoalPlannerScreen({this.back});
   static const routeName = '/goalplanner';
   @override
   Widget build(BuildContext context) {
-    final radius = MediaQuery.of(context).size.width/2;
+    final radius = MediaQuery.of(context).size.width / 2 - 60;
+    Widget circularIndicators({
+      double percent,
+      Widget child,
+      Color color,
+    }) {
+      return CircularPercentIndicator(
+        lineWidth: 12.0,
+        radius: radius,
+        percent: percent,
+        center: child,
+        progressColor: color,
+        circularStrokeCap: CircularStrokeCap.round,
+      );
+    }
+
+    Widget cardBottom(String t1, String v1) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(t1),
+              Text(
+                v1,
+                style: TextStyle(color: Colors.grey),
+              )
+            ]),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () => back(isBackKey: true)),
         title: Text('Goals'),
       ),
       body: SingleChildScrollView(
-        child: Column(children: <Widget>[
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+            Widget>[
           //Alarm icon here
+          SizedBox(height: 10),
           Icon(Icons.alarm),
+          SizedBox(height: 10),
+          Text('Your Goal Planner',
+              style: Theme.of(context).textTheme.body2.copyWith(fontSize: 16)),
+          SizedBox(height: 10),
           Text('Lorem ipsum dolor sit amet consectetur adipiscing elit'),
-          Row(children: <Widget>[
-            Expanded(
-              child: Card(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(children: <Widget>[
+              Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    children: <Widget>[
-                      Text('LIFETIME GOALS',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          )),
-                      CircularPercentIndicator(
-                        lineWidth: 10.0,
-                        radius: radius,
-                        percent: 20 / 80,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: GestureDetector(
+                    onTapUp: (_) => Navigator.of(context).push(
+                      new MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            GoalListDialog(type: GoalType.Long),
+                        fullscreenDialog: true,
+                      ),
+                    ),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 10,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
                           children: <Widget>[
-                            Text('20',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .display1
-                                    .copyWith(fontWeight: FontWeight.bold)),
-                            Text('/80 goals')
+                            Text('LIFETIME GOALS',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                )),
+                            circularIndicators(
+                              percent: 20 / 80,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text('20',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .display1
+                                          .copyWith(
+                                              fontWeight: FontWeight.bold)),
+                                  Text('/80 goals')
+                                ],
+                              ),
+                              color: Colors.blueAccent,
+                            ),
+                            cardBottom('Lifetime goals', '80 goals'),
+                            cardBottom('Achieved', '20 goals'),
                           ],
                         ),
-                        progressColor: Colors.blueAccent,
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Card(),
-              //     child: CircularPercentIndicator(
-              //lineWidth: 6.0,
-              //       radius: double.infinity,
-              //       center: Text('80%'),
-              //       progressColor: Colors.pink,
-              //     ),
-            ),
-          ]),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 10,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        children: <Widget>[
+                          Text(
+                            'SHORT TERM GOALS',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          circularIndicators(
+                              percent: 20 / 80,
+                              child: Text('80%',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .display1
+                                      .copyWith(fontWeight: FontWeight.bold)),
+                              color: Colors.pink),
+                          cardBottom('Short term goals', '100%'),
+                          cardBottom('Achieved', '80%'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ]),
+          ),
           SizedBox(height: 20),
           Text(
             'Your Lifetime goals',
@@ -75,6 +164,9 @@ class GoalPlannerScreen extends StatelessWidget {
   }
 }
 
+///
+///Helper classes {more like components or widgets used within this screen}
+///
 class GoalSummaryItems extends StatelessWidget {
   final IconData icon;
   final String description;
@@ -88,5 +180,29 @@ class GoalSummaryItems extends StatelessWidget {
         ),
         title: Text(description),
         trailing: Text(trail));
+  }
+}
+
+class GoalListDialog extends StatelessWidget {
+  final GoalType type;
+  GoalListDialog({@required this.type});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+            '${type == GoalType.Long ? 'LIFETIME GOALS' : 'SHORT TERM GOALS'}'),  
+        actions: <Widget>[
+          FlatButton(
+            child: Text(
+                'ADD NEW ${type == GoalType.Long ? 'LONG' : 'SHORT'} GOAL'),
+            onPressed: () {
+              // Link goal provider method to add goal here
+            },
+          )
+        ],
+      ),
+      body:FutureBuilder(future:null,builder:(ctx,snapshot)=>Container() ),
+    );
   }
 }

@@ -29,11 +29,11 @@ class _MainpageScreenState extends State<MainpageScreen> {
   static String payloa;
   List<Widget> pages = [
     HomeScreen(
-      gridClickHandle: gridItemClickHandle,
+      gridClickHandle: itemClickHandle,
     ),
-    ExplorerScreen(payload: payloa),
+    ExplorerScreen(payload: payloa, back: itemClickHandle),
     MusicScreen(),
-    PlannerScreen(),
+    PlannerScreen(back: itemClickHandle),
     ProfileScreen(),
   ];
   @override
@@ -45,10 +45,26 @@ class _MainpageScreenState extends State<MainpageScreen> {
     super.initState();
   }
 
-  static void gridItemClickHandle({String payload, bool isExplorer}) {
-    payloa = payload;
+  ///Item Click Handle function that handles
+  ///[isExplorer] if it shows in the explore section of the app
+  ///e.g. the GoalPlannerScreen() shows in the explore section of the app
+  ///
+  ///[payload] that holds the routeName of the Widget or screen to be passed to the
+  ///FavoritesScreen() for now
+  ///
+  ///
+  ///[isBackKey] for jumping back to page 1 of the mainPage
+  static void itemClickHandle(
+      {String payload, bool isExplorer = false, bool isBackKey = false}) {
+    //assertion to make sure that VoidCallBack is only responsible for one action at a time
+    assert((isExplorer && isBackKey) == false);
+
+    if (payload != null) payloa = payload;
     if (isExplorer) {
       _pageController.animateToPage(1,
+          duration: Duration(milliseconds: 300), curve: Curves.ease);
+    } else if (isBackKey) {
+      _pageController.animateToPage(0,
           duration: Duration(milliseconds: 300), curve: Curves.ease);
     }
   }

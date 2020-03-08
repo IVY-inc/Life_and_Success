@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import './providers/auth.dart';
+import './providers/goal.dart';
 import './screens/login_screen.dart';
 import './screens/sign_up_screen.dart';
 import './screens/welcome_screen.dart';
@@ -20,36 +21,41 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => Auth(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Life and Success',
-        theme: ThemeData(
-            primaryColor: Colors.white,
-            accentColor: Colors.black,
-            buttonTheme: ButtonThemeData(
-              buttonColor: Colors.black,
-              textTheme: ButtonTextTheme.primary,
-            ),
-            textTheme: Theme.of(context).textTheme.copyWith(
-                  title: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.black,
-                  ),
-                  body1: TextStyle(
-                    fontSize: 12,
-                  ),
-                )),
-        // darkTheme: ThemeData.dark(),
-        home: Checker(),
-        routes: {
-          WelcomeScreen.routeName: (_) => WelcomeScreen(),
-          RecoverPasswordScreen.routeName: (_) => RecoverPasswordScreen(),
-          MainpageScreen.routeName: (_) => MainpageScreen(),
-          ExplorerScreen.routeName: (_) => ExplorerScreen(),
-          GoalPlannerScreen.routeName: (_) => GoalPlannerScreen(),
-          EditProfileScreen.routeName: (_) => EditProfileScreen(),
-        },
+      //added ChangeNotifierProxyProvider to pass authentication [user] to goal provider as we
+      //need it to add and delete goals
+      child: ChangeNotifierProxyProvider<Auth, Goal>(
+        update: (ctx, auth, oldGoal) => Goal(auth.user),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Life and Success',
+          theme: ThemeData(
+              primaryColor: Colors.white,
+              accentColor: Colors.black,
+              buttonTheme: ButtonThemeData(
+                buttonColor: Colors.black,
+                textTheme: ButtonTextTheme.primary,
+              ),
+              textTheme: Theme.of(context).textTheme.copyWith(
+                    title: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.black,
+                    ),
+                    body1: TextStyle(
+                      fontSize: 12,
+                    ),
+                  )),
+          // darkTheme: ThemeData.dark(),
+          home: Checker(),
+          routes: {
+            WelcomeScreen.routeName: (_) => WelcomeScreen(),
+            RecoverPasswordScreen.routeName: (_) => RecoverPasswordScreen(),
+            MainpageScreen.routeName: (_) => MainpageScreen(),
+            ExplorerScreen.routeName: (_) => ExplorerScreen(),
+            GoalPlannerScreen.routeName: (_) => GoalPlannerScreen(),
+            EditProfileScreen.routeName: (_) => EditProfileScreen(),
+          },
+        ),
       ),
     );
   }

@@ -6,7 +6,9 @@ const kProfileImage = 'https://www.pngitem.com/pimgs/m/506-5067022_sweet-shap-pr
 enum Gender{
   Male,Female
 }
-///For Planner Screen.. Mapping each number to days of the week
+///For 
+///*****Planner Screen*****..
+/// Mapping each number to days of the week
 ///
 Map<int,String> week = {
   7:'Sunday',
@@ -17,3 +19,14 @@ Map<int,String> week = {
   5:'Friday',
   6:'Saturday',
 };
+
+///For 
+///****GoalPlannerScreen****
+/// and Planner itself.. Model of a [GoalItem]
+///
+class GoalItem{
+  DateTime date;
+  String title;
+  String description;
+  bool done;
+}
