@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:life_and_success/screens/explore/goal_planner_screen.dart';
+import './explore/goal_planner_screen.dart';
 
 //Dealing with static and final constructors and stuffs
 
 Function gBack;
 Map<String, Widget> routes = {
-  '/goalplanner': GoalPlannerScreen(back: gBack),
+  '/goalplanner': GoalPlannerScreen(back: gBack,nPayload: ExplorerScreen.np),
 };
 
 class ExplorerScreen extends StatefulWidget {
   static const routeName = '/explorer';
-  final String payload;
+  final String explorerRoute;
   final Function back;
+  static String np;
+  final String notificationPayload;
 
-  ExplorerScreen({this.payload, this.back}) {
+  ExplorerScreen({this.explorerRoute, this.back, this.notificationPayload}) {
     gBack = back;
+    np = notificationPayload;
   }
 
   @override
@@ -25,9 +28,16 @@ class _ExplorerScreenState extends State<ExplorerScreen> {
   String nav = '/goalplanner';
   @override
   void didChangeDependencies() {
-    String navi = widget.payload;
+    String navi = widget.explorerRoute;
     if (navi != null && navi != "") {
       nav = navi;
+    }
+    ///Begin of the notificationPayload handling.. it may or may not be received
+    ///If received.. go to the goal screen and push the [notificationPayload] which will be referred to as np to allow for static calls
+    /// forward.. do not bother about the result of the explorerRoute
+    ///If not received obey the explorerRoute anyways
+    if(widget.notificationPayload!=null){
+      nav = '/goalplanner';
     }
     super.didChangeDependencies();
   }

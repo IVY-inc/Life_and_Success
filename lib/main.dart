@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import './providers/auth.dart';
 import './providers/goal.dart';
@@ -14,7 +15,35 @@ import './screens/explore/goal_planner_screen.dart';
 
 import './components/background_with_footers.dart';
 
-void main() => runApp(MyApp());
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+bool launchedFromNotification = false;
+String notificationPayload;
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    launchedFromNotification = (await flutterLocalNotificationsPlugin
+            .getNotificationAppLaunchDetails())
+        .didNotificationLaunchApp;
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('icon');
+    var initializationSettingsIOS = IOSInitializationSettings();
+    var initializationSettings = InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (String payload) async {
+      if (payload != null) {
+        //receive a payload that is a concatenation of id,title,description
+        debugPrint('Intialised with payload: ${payload ?? 'null'}');
+        notificationPayload = payload;
+      }
+    });
+  } catch (e) {
+    print(e);
+  }
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -78,7 +107,7 @@ class Checker extends StatelessWidget {
         } else if (snapshot.data == null) {
           return MyHomePage();
         }
-        return MainpageScreen();
+        return MainpageScreen(nPayload: notificationPayload);
       },
     );
   }

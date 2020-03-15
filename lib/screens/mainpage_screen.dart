@@ -11,8 +11,16 @@ import './profile_screen.dart';
 int value = 0;
 
 class MainpageScreen extends StatefulWidget {
+  static String notificationPayload;
+  MainpageScreen({String nPayload}) {
+    if (nPayload != null) {
+      notificationPayload = nPayload;
+    }
+  }
+
   static const routeName = '/main';
   int getPage() {
+    if(notificationPayload!=null)return 1;
     return value;
   }
 
@@ -27,21 +35,37 @@ class MainpageScreen extends StatefulWidget {
 class _MainpageScreenState extends State<MainpageScreen> {
   static PageController _pageController;
   static String payloa;
-  List<Widget> pages = [
-    HomeScreen(
-      gridClickHandle: itemClickHandle,
-    ),
-    ExplorerScreen(payload: payloa, back: itemClickHandle),
-    MusicScreen(),
-    PlannerScreen(back: itemClickHandle),
-    ProfileScreen(),
-  ];
+  List<Widget> pages;
+  Widget getExplorer() {
+    if (MainpageScreen.notificationPayload != null) {
+      String np = MainpageScreen.notificationPayload;
+      //payload reset to null
+      MainpageScreen.notificationPayload = null;
+      
+      return ExplorerScreen(
+        explorerRoute: payloa,
+        back: itemClickHandle,
+        notificationPayload: np,
+      );
+    }
+    return ExplorerScreen(explorerRoute: payloa, back: itemClickHandle);
+  }
+
   @override
   void initState() {
     _pageController = PageController(
       keepPage: true,
       initialPage: widget.getPage(),
     );
+    pages = [
+      HomeScreen(
+        gridClickHandle: itemClickHandle,
+      ),
+      getExplorer(),
+      MusicScreen(),
+      PlannerScreen(back: itemClickHandle),
+      ProfileScreen(),
+    ];
     super.initState();
   }
 
@@ -51,7 +75,6 @@ class _MainpageScreenState extends State<MainpageScreen> {
   ///
   ///[payload] that holds the routeName of the Widget or screen to be passed to the
   ///FavoritesScreen() for now
-  ///
   ///
   ///[isBackKey] for jumping back to page 1 of the mainPage
   static void itemClickHandle(
@@ -63,9 +86,11 @@ class _MainpageScreenState extends State<MainpageScreen> {
     if (isExplorer) {
       _pageController.animateToPage(1,
           duration: Duration(milliseconds: 300), curve: Curves.ease);
-    } else if (isBackKey) {
-      _pageController.animateToPage(0,
-          duration: Duration(milliseconds: 300), curve: Curves.ease);
+    }
+    if (isBackKey && _pageController.page != 0) {
+      _pageController.jumpToPage(0);
+      //   _pageController.animateToPage(0,
+      //   duration: Duration(milliseconds: 300), curve: Curves.ease);
     }
   }
 
