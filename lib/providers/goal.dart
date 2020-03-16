@@ -43,12 +43,13 @@ class Goal extends ChangeNotifier {
       @required String title,
       @required String description,
       bool done = false}) async {
-    await _db.collection("users/${_user.uid}/short_goals").add({
+    final request = await _db.collection("users/${_user.uid}/short_goals").add({
       'time': time.toIso8601String(),
       'title': title,
       'description': description,
       'done': done,
     });
+    print(request.documentID);
     notifyListeners();
   }
 
