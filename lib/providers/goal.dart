@@ -74,4 +74,18 @@ class Goal extends ChangeNotifier {
     }
     return true;
   }
+
+  Future<void> addLongGoal(
+      {@required DateTime time,
+      @required String title,
+      @required String description,
+      bool done = false}) async {
+    await _db.collection("users/${_user.uid}/long_goals").add({
+      'time': time.toIso8601String(),
+      'title': title,
+      'description': description,
+      'done': done,
+    });
+    notifyListeners();
+  }
 }
