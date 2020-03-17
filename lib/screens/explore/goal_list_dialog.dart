@@ -16,9 +16,9 @@ class GoalListDialog extends StatefulWidget {
 
 class _GoalListDialogState extends State<GoalListDialog> {
   addNewGoal({@required BuildContext context}) async {
-    bool hasError = false;
+    bool hasError = false, taskdone = false;
     final provider = Provider.of<Goal>(context, listen: false);
-    await showCupertinoDialog(
+    if (await showCupertinoDialog<bool>(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
               actions: <Widget>[
@@ -43,39 +43,40 @@ class _GoalListDialogState extends State<GoalListDialog> {
                                     .titleController.text,
                                 description: NewGoalInputDialogState
                                     .descriptionController.text);
+                        taskdone = true;
                       } catch (e) {
                         print(e);
                         hasError = true;
                       }
-                      Navigator.of(ctx).pop();
+                      Navigator.of(ctx).pop(taskdone);
                     }),
               ],
               title: Text(
                   'Set ${widget.type == GoalType.Long ? 'a Lifetime' : 'an Instant'} goal'),
               content: NewGoalInputDialog(widget.type),
-            ));
-    showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-              title: Text(hasError ? 'Error!' : 'Success!'),
-              content: hasError
-                  ? Icon(
-                      CupertinoIcons.clear_circled_solid,
-                      color: Colors.red,
-                    )
-                  : Icon(
-                      CupertinoIcons.check_mark_circled_solid,
-                      color: Colors.green,
-                    ),
-              actions: <Widget>[
-                CupertinoDialogAction(
-                  child: Text('Ok'),
-                  isDefaultAction: true,
-                  onPressed: () => Navigator.of(ctx).pop(),
-                )
-              ],
-            ));
-            setState((){});
+            ))??false)
+      showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+                title: Text(hasError ? 'Error!' : 'Success!'),
+                content: hasError
+                    ? Icon(
+                        CupertinoIcons.clear_circled_solid,
+                        color: Colors.red,
+                      )
+                    : Icon(
+                        CupertinoIcons.check_mark_circled_solid,
+                        color: Colors.green,
+                      ),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('Ok'),
+                    isDefaultAction: true,
+                    onPressed: () => Navigator.of(ctx).pop(),
+                  )
+                ],
+              ));
+    setState(() {});
   }
 
   @override
@@ -166,10 +167,12 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
           ),
           currentTime: DateTime.now().add(Duration(days: 8)),
         );
-        dateController.text = DateFormat('EEE d/M/y').format(gTime);
+        if (gTime != null)
+          dateController.text = DateFormat('EEE d/M/y').format(gTime);
       } else {
         gTime = await DatePicker.showDateTimePicker(context);
-        dateController.text = DateFormat('EEE dd MMM HH:mm:ss').format(gTime);
+        if (gTime != null)
+          dateController.text = DateFormat('EEE dd MMM HH:mm:ss').format(gTime);
       }
       setState(() {
         goalTime = gTime;
@@ -245,10 +248,7 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
                     onTap: () async => await pickDateAndTime(),
                     controller: dateController,
                     decoration: InputDecoration(
-                      suffixIcon: GestureDetector(
-                        child: Icon(Icons.calendar_today),
-                        onTap: () => pickDateAndTime(),
-                      ),
+                      suffixIcon: Icon(Icons.calendar_today),
                     )),
               ])),
         ));
