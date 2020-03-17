@@ -6,9 +6,15 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import '../../models/constants.dart';
 import '../../providers/goal.dart';
 
-class GoalListDialog extends StatelessWidget {
+class GoalListDialog extends StatefulWidget {
   final GoalType type;
   GoalListDialog({@required this.type});
+
+  @override
+  _GoalListDialogState createState() => _GoalListDialogState();
+}
+
+class _GoalListDialogState extends State<GoalListDialog> {
   addNewGoal({@required BuildContext context}) async {
     bool hasError = false;
     final provider = Provider.of<Goal>(context, listen: false);
@@ -24,14 +30,14 @@ class GoalListDialog extends StatelessWidget {
                         return;
                       }
                       try {
-                        type == GoalType.Long
-                            ? provider.addShortGoal(
+                        widget.type == GoalType.Long
+                            ? provider.addLongGoal(
                                 time: NewGoalInputDialogState.goalTime,
                                 title: NewGoalInputDialogState
                                     .titleController.text,
                                 description: NewGoalInputDialogState
                                     .descriptionController.text)
-                            : provider.addLongGoal(
+                            : provider.addShortGoal(
                                 time: NewGoalInputDialogState.goalTime,
                                 title: NewGoalInputDialogState
                                     .titleController.text,
@@ -45,8 +51,8 @@ class GoalListDialog extends StatelessWidget {
                     }),
               ],
               title: Text(
-                  'Set ${type == GoalType.Long ? 'a Lifetime' : 'an Instant'} goal'),
-              content: NewGoalInputDialog(type),
+                  'Set ${widget.type == GoalType.Long ? 'a Lifetime' : 'an Instant'} goal'),
+              content: NewGoalInputDialog(widget.type),
             ));
     showCupertinoDialog(
         context: context,
@@ -69,6 +75,7 @@ class GoalListDialog extends StatelessWidget {
                 )
               ],
             ));
+            setState((){});
   }
 
   @override
@@ -78,7 +85,7 @@ class GoalListDialog extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-            '${type == GoalType.Long ? 'LIFETIME GOALS' : 'INSTANT GOALS'}'),
+            '${widget.type == GoalType.Long ? 'LIFETIME GOALS' : 'INSTANT GOALS'}'),
         actions: <Widget>[
           FlatButton(
             padding: EdgeInsets.all(0),
@@ -90,17 +97,17 @@ class GoalListDialog extends StatelessWidget {
         ],
       ),
       body: FutureBuilder<bool>(
-          future: type == GoalType.Long
+          future: widget.type == GoalType.Long
               ? provider.fetchLongGoals()
               : provider.fetchShortGoals(),
           builder: (ctx, snapshot) {
-            if (snapshot.hasError || snapshot?.data == false)
-              return Center(child: Text('Error displaying goals..'));
-            else if (snapshot.connectionState == ConnectionState.waiting)
+            if (snapshot.connectionState == ConnectionState.waiting)
               return Center(child: CircularProgressIndicator());
+            else if (snapshot.hasError || snapshot?.data == false)
+              return Center(child: Text('Error displaying goals..'));
             return Consumer<Goal>(builder: (ctxt, goal, ch) {
               List<GoalItem> array;
-              if (type == GoalType.Long) {
+              if (widget.type == GoalType.Long) {
                 array = goal.longgoals;
               } else {
                 array = goal.shortgoals;

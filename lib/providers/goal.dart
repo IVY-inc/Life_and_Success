@@ -18,23 +18,23 @@ class Goal extends ChangeNotifier {
   //Short Goals Section
   Future<bool> fetchShortGoals() async {
     assert(_user != null);
-    try {
+    // try {
       final snapshot =
           await _db.collection("users/${_user.uid}/short_goals").getDocuments();
       _short = snapshot.documents
           .map((doc) => GoalItem(
                 id: doc.documentID,
-                date: DateTime.parse(doc.data['date']),
+                time: DateTime.parse(doc.data['time']),
                 title: doc.data['title'],
-                done: doc.data['done'],
+                done: doc.data['done'] as bool,
                 description: doc.data['description'],
               ))
           .toList();
       notifyListeners();
-    } catch (e) {
-      print('Goal Provider: $e');
-      return false;
-    }
+    // } catch (e) {
+    //   print('Goal Provider: $e');
+    //   return false;
+    // }
     return true;
   }
 
@@ -62,7 +62,7 @@ class Goal extends ChangeNotifier {
       _long = snapshot.documents
           .map((doc) => GoalItem(
                 id: doc.documentID,
-                date: DateTime.parse(doc.data['date']),
+                time: DateTime.parse(doc.data['time']),
                 title: doc.data['title'],
                 done: doc.data['done'],
                 description: doc.data['description'],

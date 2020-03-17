@@ -27,13 +27,13 @@ Map<int, String> week = {
 /// and Planner itself.. Model of a [GoalItem]
 ///
 class GoalItem {
-  DateTime date;
+  DateTime time;
   String title;
   String id;
   String description;
   bool done;
   GoalItem(
-      {@required this.date,
+      {@required this.time,
       @required this.title,
       @required this.id,
       @required this.done,
