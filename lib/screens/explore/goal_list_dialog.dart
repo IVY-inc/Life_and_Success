@@ -46,6 +46,7 @@ class _GoalListDialogState extends State<GoalListDialog> {
                         taskdone = true;
                       } catch (e) {
                         print(e);
+                        taskdone = true;
                         hasError = true;
                       }
                       Navigator.of(ctx).pop(taskdone);
