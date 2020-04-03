@@ -19,18 +19,21 @@ class Goal extends ChangeNotifier {
   Future<bool> fetchShortGoals() async {
     assert(_user != null);
     // try {
-      final snapshot =
-          await _db.collection("users/${_user.uid}/short_goals").getDocuments();
-      _short = snapshot.documents
-          .map((doc) => GoalItem(
-                id: doc.documentID,
-                time: DateTime.parse(doc.data['time']),
-                title: doc.data['title'],
-                done: doc.data['done'] as bool,
-                description: doc.data['description'],
-              ))
-          .toList();
-      notifyListeners();
+    final snapshot = await _db
+        .collection("users/${_user.uid}/short_goals")
+        .orderBy('done')
+        .orderBy('time')
+        .getDocuments();
+    _short = snapshot.documents
+        .map((doc) => GoalItem(
+              id: doc.documentID,
+              time: DateTime.parse(doc.data['time']),
+              title: doc.data['title'],
+              done: doc.data['done'] as bool,
+              description: doc.data['description'],
+            ))
+        .toList();
+    notifyListeners();
     // } catch (e) {
     //   print('Goal Provider: $e');
     //   return false;
@@ -38,18 +41,32 @@ class Goal extends ChangeNotifier {
     return true;
   }
 
+  void deleteShortGoal(String id) async => await _db
+      .collection("users/${_user.uid}/short_goals")
+      .document(id)
+      .delete();
   Future<void> addShortGoal(
-      {@required DateTime time,
+      {String id,
+      @required DateTime time,
       @required String title,
       @required String description,
       bool done = false}) async {
-    final request = await _db.collection("users/${_user.uid}/short_goals").add({
-      'time': time.toIso8601String(),
-      'title': title,
-      'description': description,
-      'done': done,
-    });
-    print(request.documentID);
+    id == null
+        ? await _db.collection("users/${_user.uid}/short_goals").add({
+            'time': time.toIso8601String(),
+            'title': title,
+            'description': description,
+            'done': done,
+          })
+        : await _db
+            .collection("users/${_user.uid}/short_goals")
+            .document(id)
+            .updateData({
+            'time': time.toIso8601String(),
+            'title': title,
+            'description': description,
+            'done': done,
+          });
     notifyListeners();
   }
 
@@ -57,8 +74,11 @@ class Goal extends ChangeNotifier {
   Future<bool> fetchLongGoals() async {
     assert(_user != null);
     try {
-      final snapshot =
-          await _db.collection("users/${_user.uid}/long_goals").getDocuments();
+      final snapshot = await _db
+          .collection("users/${_user.uid}/long_goals")
+          .orderBy('done')
+          .orderBy('time')
+          .getDocuments();
       _long = snapshot.documents
           .map((doc) => GoalItem(
                 id: doc.documentID,
@@ -76,17 +96,32 @@ class Goal extends ChangeNotifier {
     return true;
   }
 
+  void deleteLongGoal(String id) async => await _db
+      .collection("users/${_user.uid}/long_goals")
+      .document(id)
+      .delete();
   Future<void> addLongGoal(
-      {@required DateTime time,
+      {String id,
+      @required DateTime time,
       @required String title,
       @required String description,
       bool done = false}) async {
-    await _db.collection("users/${_user.uid}/long_goals").add({
-      'time': time.toIso8601String(),
-      'title': title,
-      'description': description,
-      'done': done,
-    });
+    id == null
+        ? await _db.collection("users/${_user.uid}/long_goals").add({
+            'time': time.toIso8601String(),
+            'title': title,
+            'description': description,
+            'done': done,
+          })
+        : await _db
+            .collection("users/${_user.uid}/long_goals")
+            .document(id)
+            .updateData({
+            'time': time.toIso8601String(),
+            'title': title,
+            'description': description,
+            'done': done,
+          });
     notifyListeners();
   }
 }

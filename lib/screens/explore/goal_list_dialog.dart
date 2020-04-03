@@ -15,47 +15,56 @@ class GoalListDialog extends StatefulWidget {
 }
 
 class _GoalListDialogState extends State<GoalListDialog> {
-  addNewGoal({@required BuildContext context}) async {
+  addNewGoal(
+      {@required BuildContext context,
+      bool editMode = false,
+      GoalItem g}) async {
+    assert(editMode ^ (g == null));
+    //XORing the conditions to make sure one of 'em is true while the other false
+
     bool hasError = false, taskdone = false;
     final provider = Provider.of<Goal>(context, listen: false);
     if (await showCupertinoDialog<bool>(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-              actions: <Widget>[
-                CupertinoDialogAction(
-                    child: Text('Add Goal'),
-                    onPressed: () {
-                      if (!NewGoalInputDialogState.formKey.currentState
-                          .validate()) {
-                        return;
-                      }
-                      try {
-                        widget.type == GoalType.Long
-                            ? provider.addLongGoal(
-                                time: NewGoalInputDialogState.goalTime,
-                                title: NewGoalInputDialogState
-                                    .titleController.text,
-                                description: NewGoalInputDialogState
-                                    .descriptionController.text)
-                            : provider.addShortGoal(
-                                time: NewGoalInputDialogState.goalTime,
-                                title: NewGoalInputDialogState
-                                    .titleController.text,
-                                description: NewGoalInputDialogState
-                                    .descriptionController.text);
-                        taskdone = true;
-                      } catch (e) {
-                        print(e);
-                        taskdone = true;
-                        hasError = true;
-                      }
-                      Navigator.of(ctx).pop(taskdone);
-                    }),
-              ],
-              title: Text(
-                  'Set ${widget.type == GoalType.Long ? 'a Lifetime' : 'an Instant'} goal'),
-              content: NewGoalInputDialog(widget.type),
-            ))??false)
+            context: context,
+            builder: (ctx) => CupertinoAlertDialog(
+                  actions: <Widget>[
+                    CupertinoDialogAction(
+                        child: Text(editMode ? 'Edit Goal' : 'Add Goal'),
+                        onPressed: () {
+                          if (!NewGoalInputDialogState.formKey.currentState
+                              .validate()) {
+                            return;
+                          }
+                          try {
+                            widget.type == GoalType.Long
+                                ? provider.addLongGoal(
+                                    id: g?.id,
+                                    time: NewGoalInputDialogState.goalTime,
+                                    title: NewGoalInputDialogState
+                                        .titleController.text,
+                                    description: NewGoalInputDialogState
+                                        .descriptionController.text)
+                                : provider.addShortGoal(
+                                    id: g?.id,
+                                    time: NewGoalInputDialogState.goalTime,
+                                    title: NewGoalInputDialogState
+                                        .titleController.text,
+                                    description: NewGoalInputDialogState
+                                        .descriptionController.text);
+                            taskdone = true;
+                          } catch (e) {
+                            print(e);
+                            taskdone = true;
+                            hasError = true;
+                          }
+                          Navigator.of(ctx).pop(taskdone);
+                        }),
+                  ],
+                  title: Text(
+                      'Set ${widget.type == GoalType.Long ? 'a Lifetime' : 'an Instant'} goal'),
+                  content: NewGoalInputDialog(widget.type, g),
+                )) ??
+        false)
       showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
@@ -78,6 +87,39 @@ class _GoalListDialogState extends State<GoalListDialog> {
                 ],
               ));
     setState(() {});
+  }
+
+  editDeleteCancel(BuildContext context, GoalItem g) {
+    final provider = Provider.of<Goal>(context, listen: false);
+    showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+              title: Text('Perform an Action'),
+              actions: <Widget>[
+                CupertinoDialogAction(
+                  child: Text('Edit'),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    addNewGoal(context: context, editMode: true, g: g);
+                  },
+                ),
+                CupertinoDialogAction(
+                  child: Text('Delete'),
+                  isDestructiveAction: true,
+                  onPressed: () {
+                    widget.type == GoalType.Short
+                        ? provider.deleteShortGoal(g.id)
+                        : provider.deleteLongGoal(g.id);
+                    Navigator.of(ctx).pop();
+                    setState(() {});
+                  },
+                ),
+                CupertinoDialogAction(
+                    child: Text('Cancel'),
+                    isDefaultAction: true,
+                    onPressed: () => Navigator.of(ctx).pop()),
+              ],
+            ));
   }
 
   @override
@@ -115,8 +157,14 @@ class _GoalListDialogState extends State<GoalListDialog> {
                 array = goal.shortgoals;
               }
               return ListView.builder(
-                  itemBuilder: (ctx, index) =>
-                      ListTile(title: Text(array[index].title)),
+                  itemBuilder: (ctx, index) => CheckboxListTile(
+                      title: Text(array[index].title),
+                      secondary: Text(
+                          'Time Due: ${widget.type == GoalType.Long ? DateFormat('EEE d/M/y').format(array[index].time) : DateFormat('EEE dd MMM HH:mm:ss').format(array[index].time)}'),
+                      onChanged: array[index].done
+                          ? null
+                          : (_) => editDeleteCancel(context, array[index]),
+                      value: array[index].done),
                   itemCount: array.length);
             });
           }),
@@ -128,7 +176,8 @@ class _GoalListDialogState extends State<GoalListDialog> {
 
 class NewGoalInputDialog extends StatefulWidget {
   final GoalType type;
-  NewGoalInputDialog(this.type);
+  final GoalItem g;
+  NewGoalInputDialog(this.type, this.g);
   @override
   NewGoalInputDialogState createState() => NewGoalInputDialogState();
 }
@@ -142,8 +191,14 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
   @override
   void initState() {
     titleController = TextEditingController();
+    titleController.text = widget.g?.title;
     descriptionController = TextEditingController();
+    descriptionController.text = widget.g?.description;
     dateController = TextEditingController();
+    if (widget.g != null)
+      dateController.text = widget.type == GoalType.Long
+          ? DateFormat('EEE d/M/y').format(widget.g?.time)
+          : DateFormat('EEE dd MMM HH:mm:ss').format(widget.g?.time);
     super.initState();
   }
 
