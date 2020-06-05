@@ -159,7 +159,7 @@ class _GoalListDialogState extends State<GoalListDialog> {
               return ListView.builder(
                   itemBuilder: (ctx, index) => CheckboxListTile(
                       title: Text(array[index].title),
-                      secondary: Text(
+                      subtitle: Text(
                           'Time Due: ${widget.type == GoalType.Long ? DateFormat('EEE d/M/y').format(array[index].time) : DateFormat('EEE dd MMM HH:mm:ss').format(array[index].time)}'),
                       onChanged: array[index].done
                           ? null

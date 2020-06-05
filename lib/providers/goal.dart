@@ -15,6 +15,14 @@ class Goal extends ChangeNotifier {
   List<GoalItem> get shortgoals => [..._short];
   List<GoalItem> get longgoals => [..._long];
 
+  //Experimental feature currently available for only short goals
+  void markGoalAsDone(String id) async{
+    await _db
+        .collection("users/${_user.uid}/short_goals")
+        .document(id)
+        .updateData({'done': true});
+  }
+
   //Short Goals Section
   Future<bool> fetchShortGoals() async {
     assert(_user != null);
@@ -46,11 +54,13 @@ class Goal extends ChangeNotifier {
       .document(id)
       .delete();
   Future<void> addShortGoal(
-      {String id,
+      {
+        String id,
       @required DateTime time,
       @required String title,
       @required String description,
       bool done = false}) async {
+        //Add a notification
     id == null
         ? await _db.collection("users/${_user.uid}/short_goals").add({
             'time': time.toIso8601String(),

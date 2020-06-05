@@ -7,7 +7,8 @@ import '../../providers/goal.dart';
 import './goal_list_dialog.dart';
 import '../../models/constants.dart';
 
-
+//checker for miscalls
+var oldID;
 class GoalPlannerScreen extends StatefulWidget {
   final Function back;
   final String nPayload;
@@ -34,7 +35,11 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
       var id = splitted[0];
       var title = splitted[1];
       var description = splitted[2];
-
+      if(oldID!=null){
+        return ;
+      }else{
+        oldID = id;
+      }
       var done = await showCupertinoDialog<bool>(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
@@ -54,7 +59,6 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
             CupertinoDialogAction(
               child: Icon(CupertinoIcons.clear),
               onPressed: () {
-                //TODO: do not change [done] field to true
                 markAsDone = false;
                 Navigator.of(ctx).pop(markAsDone);
               },
@@ -67,7 +71,7 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
           ],
         ),
       );
-      
+      if(done)Provider.of(context,listen:false).markGoalAsDone(id);
     }
     
   }
