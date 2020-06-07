@@ -15,37 +15,50 @@ class Goal extends ChangeNotifier {
   List<GoalItem> get shortgoals => [..._short];
   List<GoalItem> get longgoals => [..._long];
 
+  //calculations for stats
+  
+  Future<void> fetchGoals() async {
+    try{
+    await fetchShortGoals();
+    await fetchLongGoals();
+    }catch(e){
+      print('Fetching goals for graphs: $e');
+    }
+  }
   //Experimental feature currently available for only short goals
-  void markGoalAsDone(String id) async{
+  void markGoalAsRead(String id, int checkCount) async {
     await _db
         .collection("users/${_user.uid}/short_goals")
         .document(id)
-        .updateData({'done': true});
+        .updateData({
+      'checkCount': checkCount + 1,
+      'lastChecked': DateTime.now().toIso8601String(),
+    });
+    notifyListeners();
   }
 
   //Short Goals Section
   Future<bool> fetchShortGoals() async {
     assert(_user != null);
-    // try {
-    final snapshot = await _db
-        .collection("users/${_user.uid}/short_goals")
-        .orderBy('done')
-        .orderBy('time')
-        .getDocuments();
+     try {
+    final snapshot =
+        await _db.collection("users/${_user.uid}/short_goals").getDocuments();
     _short = snapshot.documents
         .map((doc) => GoalItem(
               id: doc.documentID,
-              time: DateTime.parse(doc.data['time']),
+              checkCount: doc.data['checkCount'],
+              startDate: DateTime.parse(doc.data['startDate']),
+              endDate: DateTime.parse(doc.data['endDate']),
               title: doc.data['title'],
-              done: doc.data['done'] as bool,
               description: doc.data['description'],
+              lastChecked: DateTime.parse(doc.data['lastChecked']),
             ))
         .toList();
     notifyListeners();
-    // } catch (e) {
-    //   print('Goal Provider: $e');
-    //   return false;
-    // }
+     } catch (e) {
+      print('Goal Provider: $e');
+      return false;
+    }
     return true;
   }
 
@@ -54,28 +67,30 @@ class Goal extends ChangeNotifier {
       .document(id)
       .delete();
   Future<void> addShortGoal(
-      {
-        String id,
-      @required DateTime time,
+      {String id,
+      @required DateTime startDate,
+      @required DateTime endDate,
       @required String title,
-      @required String description,
-      bool done = false}) async {
-        //Add a notification
+      @required String description}) async {
+    //Add a notification
     id == null
         ? await _db.collection("users/${_user.uid}/short_goals").add({
-            'time': time.toIso8601String(),
+            'startDate': startDate.toIso8601String(),
+            'endDate': endDate.toIso8601String(),
             'title': title,
+            'checkCount': 0,
+            'lastChecked':
+                DateTime.now().subtract(Duration(days: 1)).toIso8601String(),
             'description': description,
-            'done': done,
           })
         : await _db
             .collection("users/${_user.uid}/short_goals")
             .document(id)
             .updateData({
-            'time': time.toIso8601String(),
+            'startDate': startDate.toIso8601String(),
+            'endDate': endDate.toIso8601String(),
             'title': title,
             'description': description,
-            'done': done,
           });
     notifyListeners();
   }
@@ -92,9 +107,9 @@ class Goal extends ChangeNotifier {
       _long = snapshot.documents
           .map((doc) => GoalItem(
                 id: doc.documentID,
-                time: DateTime.parse(doc.data['time']),
+                startDate: DateTime.parse(doc.data['startDate']),
+                endDate: DateTime.parse(doc.data['endDate']),
                 title: doc.data['title'],
-                done: doc.data['done'],
                 description: doc.data['description'],
               ))
           .toList();

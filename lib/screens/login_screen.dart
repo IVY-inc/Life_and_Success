@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
       try {
         await Provider.of<Auth>(context, listen: false)
-            .logUserIn(_emailController.text, _passwordController.text);
+            .logUserIn(_emailController.text.trim(), _passwordController.text.trim());
         _isLoading = false;
       } catch (e) {
         showDialog(
