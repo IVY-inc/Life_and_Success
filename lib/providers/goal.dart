@@ -46,12 +46,12 @@ class Goal extends ChangeNotifier {
     _short = snapshot.documents
         .map((doc) => GoalItem(
               id: doc.documentID,
-              checkCount: doc.data['checkCount'],
-              startDate: DateTime.parse(doc.data['startDate']),
-              endDate: DateTime.parse(doc.data['endDate']),
               title: doc.data['title'],
               description: doc.data['description'],
+              startDate: DateTime.parse(doc.data['startDate']),
+              endDate: DateTime.parse(doc.data['endDate']),
               lastChecked: DateTime.parse(doc.data['lastChecked']),
+              checkCount: doc.data['checkCount'],
             ))
         .toList();
     notifyListeners();
@@ -101,16 +101,15 @@ class Goal extends ChangeNotifier {
     try {
       final snapshot = await _db
           .collection("users/${_user.uid}/long_goals")
-          .orderBy('done')
-          .orderBy('time')
           .getDocuments();
       _long = snapshot.documents
           .map((doc) => GoalItem(
                 id: doc.documentID,
-                startDate: DateTime.parse(doc.data['startDate']),
-                endDate: DateTime.parse(doc.data['endDate']),
                 title: doc.data['title'],
                 description: doc.data['description'],
+                startDate: DateTime.parse(doc.data['startDate']),
+                lastChecked: DateTime.parse(doc.data['lastChecked']),
+                checkpoints: doc.data['checkpoints'] as List<LongGoalData>,
               ))
           .toList();
       notifyListeners();
@@ -127,25 +126,30 @@ class Goal extends ChangeNotifier {
       .delete();
   Future<void> addLongGoal(
       {String id,
-      @required DateTime time,
       @required String title,
       @required String description,
-      bool done = false}) async {
+      @required DateTime startDate,
+      @required List<LongGoalData> checkpoints,
+
+      }) async {
+        //creating a new goal or update the goal if the ID already exists
     id == null
         ? await _db.collection("users/${_user.uid}/long_goals").add({
-            'time': time.toIso8601String(),
+            'startDate': startDate.toIso8601String(),
             'title': title,
             'description': description,
-            'done': done,
+            'lastChecked':DateTime.now().subtract(Duration(days: 1)).toIso8601String(),
+            'checkpoints': checkpoints,
           })
         : await _db
             .collection("users/${_user.uid}/long_goals")
             .document(id)
             .updateData({
-            'time': time.toIso8601String(),
+            'startDate': startDate.toIso8601String(),
             'title': title,
             'description': description,
-            'done': done,
+            'checkpoints': checkpoints, 
+            //TODO: checkpoint can only be added to,, so as to disallow bugs
           });
     notifyListeners();
   }

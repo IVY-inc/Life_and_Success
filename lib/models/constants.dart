@@ -26,18 +26,34 @@ Map<int, String> week = {
 ///****GoalPlannerScreen****
 /// and Planner itself.. Model of a [GoalItem]
 ///
+
+class LongGoalData {
+  final int order;
+  final String checkpointDescription;
+  final int hoursCount;
+  final bool done;
+  LongGoalData(
+    this.order,
+    this.checkpointDescription,
+    this.hoursCount,
+    this.done,
+  );
+}
+
 class GoalItem {
   DateTime startDate;
   DateTime endDate;
   DateTime lastChecked;
   String title;
+  List<LongGoalData> checkpoints;
   int checkCount;
   String id;
   String description;
   GoalItem(
       {@required this.startDate,
-      @required this.endDate,
-      this.checkCount,
+      this.endDate, //needed for the short goals to calculate
+      this.checkCount, //shortGoal specific
+      this.checkpoints, //for the long goals exclusively
       this.lastChecked,
       @required this.title,
       @required this.id,
