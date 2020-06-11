@@ -166,50 +166,49 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () => Provider.of<Goal>(context, listen: false).fetchGoals(),
-        child: SingleChildScrollView(
-          child: FutureBuilder(
-              future: Provider.of<Goal>(context, listen: false).fetchGoals(),
-              builder: (ctx, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting)
-                  return Center(child: CircularProgressIndicator());
-                else if (snapshot.hasError || snapshot?.data == false)
-                  return Center(child: Text('Error displaying goals..'));
-                return Consumer<Goal>(
-                  builder: (ctx, goal, ch) {
-                    //short goals
-                    int checked = 0;
-                    int todayChecked = 0;
-                    int totalDays = 0;
-                    int weekDone = 0;
-                    DateTime firstDayOfWeek = DateTime.now().subtract(Duration(
-                      days: DateTime.now().weekday,
-                      hours: DateTime.now().hour,
-                      minutes: DateTime.now().minute,
-                      seconds: DateTime.now().second,
-                    ));
-                    goal.shortgoals.forEach((goalItem) {
-                      checked += goalItem.checkCount;
-                      try{
+        child: FutureBuilder(
+            future: Provider.of<Goal>(context, listen: false).fetchGoals(),
+            builder: (ctx, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return Center(child: CircularProgressIndicator());
+              else if (snapshot.hasError || snapshot?.data == false)
+                return Center(child: Text('Error displaying goals..'));
+              return Consumer<Goal>(
+                builder: (ctx, goal, ch) {
+                  //short goals
+                  int checked = 0;
+                  int todayChecked = 0;
+                  int totalDays = 0;
+                  int weekDone = 0;
+                  DateTime firstDayOfWeek = DateTime.now().subtract(Duration(
+                    days: DateTime.now().weekday,
+                    hours: DateTime.now().hour,
+                    minutes: DateTime.now().minute,
+                    seconds: DateTime.now().second,
+                  ));
+                  goal.shortgoals.forEach((goalItem) {
+                    checked += goalItem.checkCount;
+                    try {
                       if (goalItem.checkList.last.month ==
                               DateTime.now().month &&
                           goalItem.checkList.last.day == DateTime.now().day)
                         todayChecked += 1;
-                      }catch(e){
-                        todayChecked+=0;
-                      }
-                      totalDays += goalItem.endDate
-                          .difference(goalItem.startDate)
-                          .inDays;
-                      if ((goalItem.endDate
-                                  .difference(goalItem.startDate)
-                                  .inHours %
-                              24) >=
-                          11) totalDays += 1;
-                      goalItem.checkList.forEach((element) {
-                        if (element.isAfter(firstDayOfWeek)) weekDone++;
-                      });
+                    } catch (e) {
+                      todayChecked += 0;
+                    }
+                    totalDays +=
+                        goalItem.endDate.difference(goalItem.startDate).inDays;
+                    if ((goalItem.endDate
+                                .difference(goalItem.startDate)
+                                .inHours %
+                            24) >=
+                        11) totalDays += 1;
+                    goalItem.checkList.forEach((element) {
+                      if (element.isAfter(firstDayOfWeek)) weekDone++;
                     });
-                    return Column(
+                  });
+                  return SingleChildScrollView(
+                    child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           //Alarm icon here
@@ -280,7 +279,7 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           GoalSummaryItems(
-                              Icons.alarm, 'All lifetime goals', '80'),
+                              Icons.alarm, 'All lifetime goals', '${goal.longgoals.length}'),
                           GoalSummaryItems(
                               Icons.alarm,
                               'Daily Milestones achieved',
@@ -291,11 +290,11 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
                               '$weekDone/${goal.shortgoals.length * 7}'),
                           GoalSummaryItems(Icons.alarm,
                               'Monthly Milestones achieved', '50/92'),
-                        ]);
-                  },
-                );
-              }),
-        ),
+                        ]),
+                  );
+                },
+              );
+            }),
       ),
     );
   }

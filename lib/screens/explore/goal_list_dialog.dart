@@ -48,7 +48,10 @@ class _GoalListDialogState extends State<GoalListDialog> {
                             widget.type == GoalType.Long
                                 ? provider.addLongGoal(
                                     id: g?.id,
-                                    //time: NewGoalInputDialogState.goalTime,
+                                    startDate:
+                                        NewGoalInputDialogState.startDate,
+                                    checkpoints:
+                                        NewGoalInputDialogState.checkpoints,
                                     title: NewGoalInputDialogState
                                         .titleController.text,
                                     description: NewGoalInputDialogState
@@ -173,16 +176,21 @@ class _GoalListDialogState extends State<GoalListDialog> {
               } else {
                 array = goal.shortgoals;
               }
-              try{
-              array.sort((goalA, goalB) =>
-                  goalA.checkList.last.compareTo(goalB.checkList.last));
-              }catch(e){
+              try {
+                array.sort((goalA, goalB) =>
+                    goalA.checkList.last.compareTo(goalB.checkList.last));
+              } catch (e) {
                 print("GoalListDialog: List is empty");
               }
-              return array.isEmpty?Container(height:20, width: 20,):ListView.builder(
-                  itemBuilder: (ctx, index) =>
-                      EachGoal(array[index], editDeleteCancel),
-                  itemCount: array.length);
+              return array.isEmpty
+                  ? Container(
+                      height: 20,
+                      width: 20,
+                    )
+                  : ListView.builder(
+                      itemBuilder: (ctx, index) =>
+                          EachGoal(array[index], editDeleteCancel),
+                      itemCount: array.length);
             });
           }),
     );
@@ -201,6 +209,7 @@ class NewGoalInputDialog extends StatefulWidget {
 
 class NewGoalInputDialogState extends State<NewGoalInputDialog> {
   static TextEditingController titleController;
+  static List<LongGoalData> checkpoints;
   static TextEditingController descriptionController;
   String startDateHolder = '-_-';
   String endDateHolder = '-_-';
@@ -208,6 +217,37 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
   static DateTime startDate;
   static DateTime endDate;
   static final formKey = GlobalKey<FormState>();
+
+  int initialCount = 3;
+  int fieldCount = 0;
+  int nextIndex = 0;
+  List<TextEditingController> controllers = <TextEditingController>[];
+  List<Widget> _buildList() {
+    int i;
+    if (controllers.length < fieldCount) {
+      for (i = controllers.length; i < fieldCount; i++) {
+        controllers.add(TextEditingController());
+      }
+    }
+    i = 0;
+    return controllers.map<Widget>((TextEditingController controller) {
+      return TextFormField(
+        controller: controller,
+        maxLines: 1,
+        decoration: InputDecoration(
+            labelText: "Enter checkpoint desc.",
+            suffixIcon: IconButton(
+                icon: Icon(Icons.cancel, color: Colors.red),
+                onPressed: () {
+                  setState(() {
+                    fieldCount--;
+                    controllers.remove(controller);
+                  });
+                })),
+      );
+    }).toList();
+  }
+
   @override
   void initState() {
     titleController = TextEditingController();
@@ -222,6 +262,7 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
           ? DateFormat('EEE d/M/y').format(widget.g?.endDate)
           : DateFormat('EEE dd MMM HH:mm:ss').format(widget.g?.endDate);
     }
+    fieldCount = initialCount;
     super.initState();
   }
 
@@ -240,10 +281,8 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
       if (widget.type == GoalType.Long) {
         gTime = await DatePicker.showDatePicker(
           context,
-          minTime: DateTime.now().add(
-            Duration(days: 7),
-          ),
-          currentTime: DateTime.now().add(Duration(days: 8)),
+          minTime: DateTime.now(),
+          currentTime: DateTime.now(),
         );
         if (gTime != null)
           startDateHolder = DateFormat('EEE d/M/y').format(gTime);
@@ -260,6 +299,25 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
       });
     }
 
+    final List<Widget> children = _buildList();
+    children.add(GestureDetector(
+      onTap: () {
+        setState(() {
+          fieldCount++;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Colors.black),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Text(
+            'Add Checkpoint',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
+    ));
     return Form(
         key: formKey,
         child: Material(
@@ -301,7 +359,7 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
                     }
                     return null;
                   },
-                  maxLines: 5,
+                  maxLines: widget.type == GoalType.Long ? 3 : 5,
                   controller: descriptionController,
                   decoration: InputDecoration(
                     filled: true,
@@ -319,7 +377,7 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: widget.type == GoalType.Long ? 10 : 20),
                 GestureDetector(
                   onTap: () => pickDateAndTime(),
                   child: Row(
@@ -332,20 +390,21 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
                   ),
                 ),
                 SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () => pickDateAndTime(isStartDate: false),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text('End',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(endDateHolder),
-                    ],
+                if (widget.type == GoalType.Short)
+                  GestureDetector(
+                    onTap: () => pickDateAndTime(isStartDate: false),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text('End',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(endDateHolder),
+                      ],
+                    ),
                   ),
-                ),
-                if (dateError)
-                  Text('Enter correct dates in the above space',
-                      style: TextStyle(color: Colors.red)),
+                //TODO: Add error checking for Date, setState didnt work with if() here
+                if (widget.type == GoalType.Long)
+                  ...children
               ])),
         ));
   }

@@ -133,6 +133,8 @@ class Goal extends ChangeNotifier {
       .collection("users/${_user.uid}/long_goals")
       .document(id)
       .delete();
+
+      
   Future<void> addLongGoal({
     String id,
     @required String title,
