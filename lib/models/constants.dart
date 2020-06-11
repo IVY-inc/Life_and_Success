@@ -43,7 +43,7 @@ class LongGoalData {
 class GoalItem {
   DateTime startDate;
   DateTime endDate;
-  DateTime lastChecked;
+  List<DateTime> checkList;
   String title;
   List<LongGoalData> checkpoints;
   int checkCount;
@@ -54,7 +54,7 @@ class GoalItem {
       this.endDate, //needed for the short goals to calculate
       this.checkCount, //shortGoal specific
       this.checkpoints, //for the long goals exclusively
-      this.lastChecked,
+      this.checkList, //List of DateTimes where clicks were made
       @required this.title,
       @required this.id,
       this.description});

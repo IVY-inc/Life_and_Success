@@ -19,7 +19,12 @@ class _EachGoalState extends State<EachGoal> {
 
   @override
   void initState() {
-    last = widget.goalItem.lastChecked;
+    try{
+    last = widget.goalItem.checkList.last;
+    }catch(e){
+      last = DateTime.now().subtract(Duration(days:1));
+    }
+    print(last);
     today = DateTime.now();
     val = last.month == today.month && last.day == today.day;
     super.initState();
@@ -46,7 +51,7 @@ class _EachGoalState extends State<EachGoal> {
       }
       val = true;
       goalProvider.markGoalAsRead(
-          widget.goalItem.id, widget.goalItem.checkCount);
+          widget.goalItem.id, widget.goalItem.checkCount,widget.goalItem.checkList);
       setState(() {});
     }
 
@@ -77,7 +82,7 @@ class _EachGoalState extends State<EachGoal> {
                       val ? TextDecoration.lineThrough : TextDecoration.none),
             ),
             subtitle: Text(
-                'Last Checked: ${val ? 'Today' : DateFormat('EEE d/M/y').format(widget.goalItem.lastChecked)}'),
+                'Last Checked: ${val ? 'Today' : DateFormat('EEE d/M/y').format(last)}'),
             checkColor: Colors.white,
             activeColor: Colors.greenAccent),
       ),

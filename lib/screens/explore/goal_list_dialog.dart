@@ -173,9 +173,13 @@ class _GoalListDialogState extends State<GoalListDialog> {
               } else {
                 array = goal.shortgoals;
               }
+              try{
               array.sort((goalA, goalB) =>
-                  goalA.lastChecked.compareTo(goalB.lastChecked));
-              return ListView.builder(
+                  goalA.checkList.last.compareTo(goalB.checkList.last));
+              }catch(e){
+                print("GoalListDialog: List is empty");
+              }
+              return array.isEmpty?Container(height:20, width: 20,):ListView.builder(
                   itemBuilder: (ctx, index) =>
                       EachGoal(array[index], editDeleteCancel),
                   itemCount: array.length);

@@ -180,11 +180,23 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
                     int checked = 0;
                     int todayChecked = 0;
                     int totalDays = 0;
+                    int weekDone = 0;
+                    DateTime firstDayOfWeek = DateTime.now().subtract(Duration(
+                      days: DateTime.now().weekday,
+                      hours: DateTime.now().hour,
+                      minutes: DateTime.now().minute,
+                      seconds: DateTime.now().second,
+                    ));
                     goal.shortgoals.forEach((goalItem) {
                       checked += goalItem.checkCount;
-                      if (goalItem.lastChecked.month == DateTime.now().month &&
-                          goalItem.lastChecked.day == DateTime.now().day)
+                      try{
+                      if (goalItem.checkList.last.month ==
+                              DateTime.now().month &&
+                          goalItem.checkList.last.day == DateTime.now().day)
                         todayChecked += 1;
+                      }catch(e){
+                        todayChecked+=0;
+                      }
                       totalDays += goalItem.endDate
                           .difference(goalItem.startDate)
                           .inDays;
@@ -193,6 +205,9 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
                                   .inHours %
                               24) >=
                           11) totalDays += 1;
+                      goalItem.checkList.forEach((element) {
+                        if (element.isAfter(firstDayOfWeek)) weekDone++;
+                      });
                     });
                     return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -266,10 +281,14 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
                           ),
                           GoalSummaryItems(
                               Icons.alarm, 'All lifetime goals', '80'),
-                          GoalSummaryItems(Icons.alarm,
-                              'Daily Milestones achieved', '$todayChecked/${goal.shortgoals.length}'),
                           GoalSummaryItems(
-                              Icons.alarm, 'Weekly milestones achieved', '4/7'),
+                              Icons.alarm,
+                              'Daily Milestones achieved',
+                              '$todayChecked/${goal.shortgoals.length}'),
+                          GoalSummaryItems(
+                              Icons.alarm,
+                              'Weekly milestones achieved',
+                              '$weekDone/${goal.shortgoals.length * 7}'),
                           GoalSummaryItems(Icons.alarm,
                               'Monthly Milestones achieved', '50/92'),
                         ]);
