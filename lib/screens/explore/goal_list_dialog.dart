@@ -16,15 +16,25 @@ class GoalListDialog extends StatefulWidget {
 }
 
 class _GoalListDialogState extends State<GoalListDialog> {
+  List<LongGoalData> checkpoints;
+  List<TextEditingController> controllers = [];
+  void registerControllers() {
+    checkpoints = controllers
+        .map((controller) => LongGoalData(
+            controllers.indexOf(controller), controller.text, 0, false))
+        .toList();
+        controllers.clear();
+  }
   addNewGoal(
       {@required BuildContext context,
+      Goal provider,
       bool editMode = false,
       GoalItem g}) async {
     assert(editMode ^ (g == null));
     //XORing the conditions to make sure one of 'em is true while the other false
 
     bool hasError = false, taskdone = false;
-    final provider = Provider.of<Goal>(context, listen: false);
+    //final provider = Provider.of<Goal>(context, listen: false);
     if (await showCupertinoDialog<bool>(
             context: context,
             builder: (ctx) => CupertinoAlertDialog(
@@ -37,21 +47,33 @@ class _GoalListDialogState extends State<GoalListDialog> {
                             return;
                           }
                           if (NewGoalInputDialogState.startDate == null ||
-                              NewGoalInputDialogState.endDate == null) {
-                            setState(() {
-                              NewGoalInputDialogState.dateError = true;
-                            });
+                              (widget.type == GoalType.Short &&
+                                  NewGoalInputDialogState.endDate == null)) {
+                            showCupertinoDialog(
+                                context: context,
+                                builder: (ctx) => CupertinoAlertDialog(
+                                      content:
+                                          Text('Select Valid Start/End Dates'),
+                                      actions: <Widget>[
+                                        CupertinoDialogAction(
+                                            child: Text('OK'),
+                                            onPressed: () =>
+                                                Navigator.of(ctx).pop())
+                                      ],
+                                    ));
                             return;
                           }
-                          NewGoalInputDialogState.dateError = false;
                           try {
+                            if (widget.type == GoalType.Long) {
+                              registerControllers();
+                            }
                             widget.type == GoalType.Long
                                 ? provider.addLongGoal(
                                     id: g?.id,
                                     startDate:
                                         NewGoalInputDialogState.startDate,
                                     checkpoints:
-                                        NewGoalInputDialogState.checkpoints,
+                                        checkpoints,
                                     title: NewGoalInputDialogState
                                         .titleController.text,
                                     description: NewGoalInputDialogState
@@ -81,7 +103,7 @@ class _GoalListDialogState extends State<GoalListDialog> {
                   ],
                   title: Text(
                       'Set ${widget.type == GoalType.Long ? 'a Lifetime' : 'an Instant'} goal'),
-                  content: NewGoalInputDialog(widget.type, g),
+                  content: NewGoalInputDialog(widget.type, g,controllers),
                 )) ??
         false) {
       showCupertinoDialog(
@@ -156,7 +178,7 @@ class _GoalListDialogState extends State<GoalListDialog> {
             child: Text(
               'NEW GOAL',
             ),
-            onPressed: () => addNewGoal(context: context),
+            onPressed: () => addNewGoal(context: context,provider:provider),
           )
         ],
       ),
@@ -202,18 +224,18 @@ class _GoalListDialogState extends State<GoalListDialog> {
 class NewGoalInputDialog extends StatefulWidget {
   final GoalType type;
   final GoalItem g;
-  NewGoalInputDialog(this.type, this.g);
+  final List<TextEditingController> controllers;
+  NewGoalInputDialog(this.type, this.g,this.controllers);
   @override
   NewGoalInputDialogState createState() => NewGoalInputDialogState();
 }
 
 class NewGoalInputDialogState extends State<NewGoalInputDialog> {
   static TextEditingController titleController;
-  static List<LongGoalData> checkpoints;
+  
   static TextEditingController descriptionController;
   String startDateHolder = '-_-';
   String endDateHolder = '-_-';
-  static bool dateError = false;
   static DateTime startDate;
   static DateTime endDate;
   static final formKey = GlobalKey<FormState>();
@@ -221,28 +243,35 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
   int initialCount = 3;
   int fieldCount = 0;
   int nextIndex = 0;
-  List<TextEditingController> controllers = <TextEditingController>[];
+
   List<Widget> _buildList() {
     int i;
-    if (controllers.length < fieldCount) {
-      for (i = controllers.length; i < fieldCount; i++) {
-        controllers.add(TextEditingController());
+    if (widget.controllers.length < fieldCount) {
+      for (i = widget.controllers.length; i < fieldCount; i++) {
+        widget.controllers.add(TextEditingController());
       }
     }
     i = 0;
-    return controllers.map<Widget>((TextEditingController controller) {
+    return widget.controllers.map<Widget>((TextEditingController controller) {
       return TextFormField(
         controller: controller,
+        validator: (str) {
+          if (str.isEmpty || str.length == 0) {
+            return 'Enter checkpoints desc...';
+          }
+          return null;
+        },
         maxLines: 1,
         decoration: InputDecoration(
             labelText: "Enter checkpoint desc.",
             suffixIcon: IconButton(
                 icon: Icon(Icons.cancel, color: Colors.red),
                 onPressed: () {
-                  setState(() {
-                    fieldCount--;
-                    controllers.remove(controller);
-                  });
+                  if (widget.controllers.length > 3)
+                    setState(() {
+                      fieldCount--;
+                      widget.controllers.remove(controller);
+                    });
                 })),
       );
     }).toList();
@@ -302,13 +331,33 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
     final List<Widget> children = _buildList();
     children.add(GestureDetector(
       onTap: () {
-        setState(() {
-          fieldCount++;
-        });
+        bool goAhead = true;
+        for (int i = 0; i < widget.controllers.length; i++) {
+          if (widget.controllers[i].text.isEmpty || widget.controllers[i].text == '') {
+            goAhead = false;
+          }
+        }
+        if (!goAhead) {
+          showCupertinoDialog(
+              context: context,
+              builder: (ctx) => CupertinoAlertDialog(
+                    content: Text('Minimum of 3 checkpoints is required!'),
+                    actions: <Widget>[
+                      CupertinoDialogAction(
+                          child: Text('OK'),
+                          onPressed: () => Navigator.of(ctx).pop())
+                    ],
+                  ));
+        } else {
+          setState(() {
+            fieldCount++;
+          });
+        }
       },
       child: Container(
         margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: Colors.black),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10), color: Colors.black),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Text(
@@ -402,9 +451,7 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
                       ],
                     ),
                   ),
-                //TODO: Add error checking for Date, setState didnt work with if() here
-                if (widget.type == GoalType.Long)
-                  ...children
+                if (widget.type == GoalType.Long) ...children
               ])),
         ));
   }

@@ -30,7 +30,8 @@ class Goal extends ChangeNotifier {
   void markGoalAsRead(
       String id, int checkCount, List<DateTime> checkList) async {
     checkList.add(DateTime.now());
-    List<String> newCheckList = checkList.map((e)=>e.toIso8601String()).toList();
+    List<String> newCheckList =
+        checkList.map((e) => e.toIso8601String()).toList();
     await _db
         .collection("users/${_user.uid}/short_goals")
         .document(id)
@@ -115,10 +116,13 @@ class Goal extends ChangeNotifier {
                 title: doc.data['title'],
                 description: doc.data['description'],
                 startDate: DateTime.parse(doc.data['startDate']),
-                checkList: (doc.data['checkList'] as List<String>)
-                    .map((element) => DateTime.parse(element))
-                    .toList(),
-                checkpoints: doc.data['checkpoints'] as List<LongGoalData>,
+                checkList: ((doc.data['checkList'] as List)
+                        ?.map((element) => DateTime.parse(element))
+                        ?.toList()) ??
+                    [],
+                checkpoints: (doc.data['checkpoints'] as List).map((ch) =>
+                    LongGoalData(ch['order'], ch['checkpointDescription'],
+                        ch['hoursCount'], ch['done'])).toList(),
               ))
           .toList();
       notifyListeners();
@@ -134,7 +138,6 @@ class Goal extends ChangeNotifier {
       .document(id)
       .delete();
 
-      
   Future<void> addLongGoal({
     String id,
     @required String title,
@@ -143,6 +146,7 @@ class Goal extends ChangeNotifier {
     @required List<LongGoalData> checkpoints,
   }) async {
     List<String> checkList = [];
+
     //creating a new goal or update the goal if the ID already exists
     id == null
         ? await _db.collection("users/${_user.uid}/long_goals").add({
@@ -150,7 +154,14 @@ class Goal extends ChangeNotifier {
             'title': title,
             'description': description,
             'checkList': checkList,
-            'checkpoints': checkpoints,
+            'checkpoints': checkpoints
+                .map((l) => {
+                      'checkpointDescription': l.checkpointDescription,
+                      'done': l.done,
+                      'hoursCount': l.hoursCount,
+                      'order': l.order,
+                    })
+                .toList(),
           })
         : await _db
             .collection("users/${_user.uid}/long_goals")
@@ -159,7 +170,14 @@ class Goal extends ChangeNotifier {
             'startDate': startDate.toIso8601String(),
             'title': title,
             'description': description,
-            'checkpoints': checkpoints,
+            'checkpoints': checkpoints
+                .map((l) => {
+                      'checkpointDescription': l.checkpointDescription,
+                      'done': l.done,
+                      'hoursCount': l.hoursCount,
+                      'order': l.order,
+                    })
+                .toList(),
             //TODO: checkpoint can only be added to,, so as to disallow bugs
           });
     notifyListeners();
