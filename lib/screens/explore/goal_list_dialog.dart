@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import './each_goal.dart';
+import './goal_each.dart';
 import '../../models/constants.dart';
 import '../../providers/goal.dart';
 
@@ -23,8 +23,9 @@ class _GoalListDialogState extends State<GoalListDialog> {
         .map((controller) => LongGoalData(
             controllers.indexOf(controller), controller.text, 0, false))
         .toList();
-        controllers.clear();
+    controllers.clear();
   }
+
   addNewGoal(
       {@required BuildContext context,
       Goal provider,
@@ -68,17 +69,16 @@ class _GoalListDialogState extends State<GoalListDialog> {
                               registerControllers();
                             }
                             widget.type == GoalType.Long
-                                ? provider.addLongGoal(
+                                ? Provider.of<Goal>(context,listen:false).addLongGoal(
                                     id: g?.id,
                                     startDate:
                                         NewGoalInputDialogState.startDate,
-                                    checkpoints:
-                                        checkpoints,
+                                    checkpoints: checkpoints,
                                     title: NewGoalInputDialogState
                                         .titleController.text,
                                     description: NewGoalInputDialogState
                                         .descriptionController.text)
-                                : provider.addShortGoal(
+                                : Provider.of<Goal>(context,listen:false).addShortGoal(
                                     id: g?.id,
                                     startDate:
                                         NewGoalInputDialogState.startDate,
@@ -103,7 +103,7 @@ class _GoalListDialogState extends State<GoalListDialog> {
                   ],
                   title: Text(
                       'Set ${widget.type == GoalType.Long ? 'a Lifetime' : 'an Instant'} goal'),
-                  content: NewGoalInputDialog(widget.type, g,controllers),
+                  content: NewGoalInputDialog(widget.type, g, controllers),
                 )) ??
         false) {
       showCupertinoDialog(
@@ -178,7 +178,7 @@ class _GoalListDialogState extends State<GoalListDialog> {
             child: Text(
               'NEW GOAL',
             ),
-            onPressed: () => addNewGoal(context: context,provider:provider),
+            onPressed: () => addNewGoal(context: context, provider: provider),
           )
         ],
       ),
@@ -211,7 +211,7 @@ class _GoalListDialogState extends State<GoalListDialog> {
                     )
                   : ListView.builder(
                       itemBuilder: (ctx, index) =>
-                          EachGoal(array[index], editDeleteCancel),
+                          EachGoal(array[index], editDeleteCancel,widget.type),
                       itemCount: array.length);
             });
           }),
@@ -225,14 +225,14 @@ class NewGoalInputDialog extends StatefulWidget {
   final GoalType type;
   final GoalItem g;
   final List<TextEditingController> controllers;
-  NewGoalInputDialog(this.type, this.g,this.controllers);
+  NewGoalInputDialog(this.type, this.g, this.controllers);
   @override
   NewGoalInputDialogState createState() => NewGoalInputDialogState();
 }
 
 class NewGoalInputDialogState extends State<NewGoalInputDialog> {
   static TextEditingController titleController;
-  
+
   static TextEditingController descriptionController;
   String startDateHolder = '-_-';
   String endDateHolder = '-_-';
@@ -287,9 +287,14 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
       startDateHolder = widget.type == GoalType.Long
           ? DateFormat('EEE d/M/y').format(widget.g?.startDate)
           : DateFormat('EEE dd MMM HH:mm:ss').format(widget.g?.startDate);
-      endDateHolder = widget.type == GoalType.Long
-          ? DateFormat('EEE d/M/y').format(widget.g?.endDate)
-          : DateFormat('EEE dd MMM HH:mm:ss').format(widget.g?.endDate);
+      if (widget.type == GoalType.Short)
+        endDateHolder =
+            DateFormat('EEE dd MMM HH:mm:ss').format(widget.g?.endDate);
+      if (widget.type == GoalType.Long) {
+        widget.controllers.clear();
+        widget.controllers.addAll(widget.g.checkpoints
+            .map((e) => TextEditingController(text: e.checkpointDescription)));
+      }
     }
     fieldCount = initialCount;
     super.initState();
@@ -333,7 +338,8 @@ class NewGoalInputDialogState extends State<NewGoalInputDialog> {
       onTap: () {
         bool goAhead = true;
         for (int i = 0; i < widget.controllers.length; i++) {
-          if (widget.controllers[i].text.isEmpty || widget.controllers[i].text == '') {
+          if (widget.controllers[i].text.isEmpty ||
+              widget.controllers[i].text == '') {
             goAhead = false;
           }
         }

@@ -27,16 +27,16 @@ class Goal extends ChangeNotifier {
   }
 
   //Experimental feature currently available for only short goals
-  void markGoalAsRead(
-      String id, int checkCount, List<DateTime> checkList) async {
-    checkList.add(DateTime.now());
+  void markShortGoalAsRead(
+      GoalItem goalItem) async {
+    goalItem.checkList.add(DateTime.now());
     List<String> newCheckList =
-        checkList.map((e) => e.toIso8601String()).toList();
+        goalItem.checkList.map((e) => e.toIso8601String()).toList();
     await _db
         .collection("users/${_user.uid}/short_goals")
-        .document(id)
+        .document(goalItem.id)
         .updateData({
-      'checkCount': checkCount + 1,
+      'checkCount': goalItem.checkCount + 1,
       'checkList': newCheckList,
     });
     notifyListeners();
@@ -105,6 +105,34 @@ class Goal extends ChangeNotifier {
   }
 
   //Long Goals Section
+  void markLongGoalAsRead(GoalItem goalItem) async {
+    for (int i = 0; i < goalItem.checkpoints.length; i++) {
+      if (!goalItem.checkpoints[i].done) {
+        goalItem.checkpoints[i].done = true;
+        goalItem.checkpoints[i].hoursCount += DateTime.now()
+            .difference(goalItem.checkList.isEmpty?goalItem.startDate:goalItem.checkList.last)
+            .inHours;
+        goalItem.checkList.add(DateTime.now());
+        break;
+      }
+    }
+    await _db
+        .collection("users/${_user.uid}/long_goals")
+        .document(goalItem.id)
+        .updateData({
+      'checkList': goalItem.checkList.map((e)=>e.toIso8601String()).toList(),
+      'checkpoints': goalItem.checkpoints
+          .map((l) => {
+                'checkpointDescription': l.checkpointDescription,
+                'done': l.done,
+                'hoursCount': l.hoursCount,
+                'order': l.order,
+              })
+          .toList(),
+    });
+    notifyListeners();
+  }
+
   Future<bool> fetchLongGoals() async {
     assert(_user != null);
     try {
@@ -120,9 +148,13 @@ class Goal extends ChangeNotifier {
                         ?.map((element) => DateTime.parse(element))
                         ?.toList()) ??
                     [],
-                checkpoints: (doc.data['checkpoints'] as List).map((ch) =>
-                    LongGoalData(ch['order'], ch['checkpointDescription'],
-                        ch['hoursCount'], ch['done'])).toList(),
+                checkpoints: (doc.data['checkpoints'] as List)
+                    .map((ch) => LongGoalData(
+                        ch['order'],
+                        ch['checkpointDescription'],
+                        ch['hoursCount'],
+                        ch['done']))
+                    .toList(),
               ))
           .toList();
       notifyListeners();

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 //if authenticated user has no profile Image...
 //stub Image is used
@@ -30,8 +30,8 @@ Map<int, String> week = {
 class LongGoalData {
   final int order;
   final String checkpointDescription;
-  final int hoursCount;
-  final bool done;
+  int hoursCount;
+  bool done;
   LongGoalData(
     this.order,
     this.checkpointDescription,
@@ -61,3 +61,14 @@ class GoalItem {
 }
 
 enum GoalType { Short, Long }
+
+//Colors I used for LongGoals UI design
+List<MaterialColor> colors = [
+  Colors.red,
+  Colors.blue,
+  Colors.green,
+  Colors.purple,
+  Colors.yellow,
+  Colors.orange,
+  Colors.cyan
+];
