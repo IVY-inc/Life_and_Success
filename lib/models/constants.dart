@@ -72,3 +72,22 @@ List<MaterialColor> colors = [
   Colors.orange,
   Colors.cyan
 ];
+
+class SubMusicSection{
+  final String musicSubTitle;
+  final int musicCount;
+  final String thumbnailUrl;
+  final String id;
+  const SubMusicSection({this.musicSubTitle,this.musicCount, this.id,this.thumbnailUrl});
+  String get title{
+    return musicSubTitle;
+  }
+  String get subtitle{
+    return '$musicCount audios';
+  }
+}
+class MainMusicSection{
+  final String sectionTitle;
+  final List<SubMusicSection> children;
+  MainMusicSection(this.sectionTitle, this.children);
+}

@@ -261,7 +261,7 @@ class _GoalPlannerScreenState extends State<GoalPlannerScreen> {
                                 circularIndicator: circularIndicators(
                                     percent: (checked == 0 && totalDays == 0)
                                         ? 0.0
-                                        : checked / totalDays,
+                                        : min(1,checked / totalDays),
                                     child: Text(
                                         '${totalDays == 0 ? 0 : min(99, (checked * 100 / totalDays).round())}%',
                                         style: Theme.of(context)
