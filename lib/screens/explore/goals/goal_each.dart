@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../providers/goal.dart';
-import '../../models/constants.dart';
+import '../../../providers/goal.dart';
+import '../../../models/constants.dart';
 
 int i = 0; //Used for colors
 

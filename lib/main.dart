@@ -11,7 +11,7 @@ import './screens/welcome_screen.dart';
 import './screens/explore_screen.dart';
 import './screens/mainpage_screen.dart';
 import './screens/profile/edit_profile_screen.dart';
-import './screens/explore/goal_planner_screen.dart';
+import './screens/explore/goals/goal_planner_screen.dart';
 
 import './components/background_with_footers.dart';
 
@@ -65,12 +65,12 @@ class MyApp extends StatelessWidget {
                 textTheme: ButtonTextTheme.primary,
               ),
               textTheme: Theme.of(context).textTheme.copyWith(
-                    title: TextStyle(
+                    headline6: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                       color: Colors.black,
                     ),
-                    body1: TextStyle(
+                    bodyText2: TextStyle(
                       fontSize: 12,
                     ),
                   )),

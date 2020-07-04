@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import './goal_each.dart';
-import '../../models/constants.dart';
-import '../../providers/goal.dart';
+import '../../../models/constants.dart';
+import '../../../providers/goal.dart';
 
 class GoalListDialog extends StatefulWidget {
   final GoalType type;

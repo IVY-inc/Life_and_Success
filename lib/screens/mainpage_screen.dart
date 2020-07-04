@@ -62,7 +62,7 @@ class _MainpageScreenState extends State<MainpageScreen> {
         gridClickHandle: itemClickHandle,
       ),
       getExplorer(),
-      MusicScreen(),
+      MusicScreen(back: itemClickHandle),
       PlannerScreen(back: itemClickHandle),
       ProfileScreen(),
     ];
@@ -100,11 +100,14 @@ class _MainpageScreenState extends State<MainpageScreen> {
       body: SafeArea(
         child: PageView.builder(
           itemCount: 5,
-          onPageChanged: (index) => setState(() {
+          onPageChanged: (index){
             widget.setPage(index);
             _pageController.animateToPage(index,
                 duration: Duration(milliseconds: 300), curve: Curves.ease);
-          }),
+                setState(() {
+                  
+                });
+          },
           itemBuilder: (ctx, index) => pages[index],
           controller: _pageController,
         ),

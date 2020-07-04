@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/goal.dart';
+import '../../../providers/goal.dart';
 import './goal_list_dialog.dart';
-import '../../models/constants.dart';
+import '../../../models/constants.dart';
 
 //checker for miscalls
 var oldID;

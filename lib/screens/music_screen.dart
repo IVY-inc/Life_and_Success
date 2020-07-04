@@ -45,10 +45,12 @@ List<SubMusicSection> binaura = [
 ];
 
 class MusicScreen extends StatelessWidget {
+  final Function back;
+  MusicScreen({this.back});
   final motivationals = motivs
       .map((e) => Container(
-        width: 105,
-        child: Column(children: [
+            width: 105,
+            child: Column(children: [
               Container(
                   height: 100,
                   width: 100,
@@ -59,23 +61,23 @@ class MusicScreen extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 padding: EdgeInsets.only(left: 10),
                 child: Text(e.title,
-                  
-                      style: TextStyle(
-                        
-                        fontWeight: FontWeight.bold,
-                      )),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    )),
               ),
               Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(left: 10),
-                child: Text(e.subtitle,)),
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.only(left: 10),
+                  child: Text(
+                    e.subtitle,
+                  )),
             ]),
-      ))
+          ))
       .toList();
   final binaurals = binaura
       .map((e) => Container(
-        width:105,
-        child: Column(children: [
+            width: 105,
+            child: Column(children: [
               Container(
                   height: 100,
                   width: 100,
@@ -86,68 +88,70 @@ class MusicScreen extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 padding: EdgeInsets.only(left: 10),
                 child: Text(e.title,
-                  
-                      style: TextStyle(
-                        
-                        fontWeight: FontWeight.bold,
-                      )),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    )),
               ),
               Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(left: 10),
-                child: Text(e.subtitle,)),
+                  alignment: Alignment.centerLeft,
+                  padding: EdgeInsets.only(left: 10),
+                  child: Text(
+                    e.subtitle,
+                  )),
             ]),
-      ))
+          ))
       .toList();
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text('Music'),
-        actions: <Widget>[
-          Container(
-            decoration:
-                BoxDecoration(shape: BoxShape.circle, color: Colors.grey[200]),
-            padding: EdgeInsets.all(8),
-            child: Icon(CupertinoIcons.search),
-          )
-        ],
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+    //if(height==null)height = MediaQuery.of(context).size.height;
+    return WillPopScope(
+      onWillPop: () => back(isBackKey: true),
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          title: Text('Music'),
+          actions: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle, color: Colors.grey[200]),
+              padding: EdgeInsets.all(8),
+              child: Icon(CupertinoIcons.search),
+            )
+          ],
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () => back(isBackKey: true),
+          ),
         ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Card(height * 0.3),
-              SizedBox(height: 20),
-              Text('Motivational Audio'),
-              SizedBox(height: 20),
-              Container(
-                height: 150,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: motivationals,
+        body: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Card(300),
+                SizedBox(height: 20),
+                Text('Motivational Audio'),
+                SizedBox(height: 20),
+                Container(
+                  height: 150,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: motivationals,
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text('Binaural beats'),
-              SizedBox(height: 20),
-              Container(
-                height: 150,
-                child: ListView(
-                  
-                  scrollDirection: Axis.horizontal,
-                  children: binaurals,
+                SizedBox(height: 20),
+                Text('Binaural beats'),
+                SizedBox(height: 20),
+                Container(
+                  height: 150,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: binaurals,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

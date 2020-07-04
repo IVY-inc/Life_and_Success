@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import './explore/goal_planner_screen.dart';
+import './explore/goals/goal_planner_screen.dart';
+import './explore/books/books_screen.dart';
 
 //Dealing with static and final constructors and stuffs
 
 Function gBack;
 Map<String, Widget> routes = {
   '/goalplanner': GoalPlannerScreen(back: gBack,nPayload: ExplorerScreen.np),
+  '/books': BooksScreen(back: gBack),
 };
 
 class ExplorerScreen extends StatefulWidget {
@@ -37,6 +39,7 @@ class _ExplorerScreenState extends State<ExplorerScreen> {
     /// forward.. do not bother about the result of the explorerRoute
     ///If not received obey the explorerRoute anyways
     if(widget.notificationPayload!=null){
+      print('Explorer screen line 42');
       nav = '/goalplanner';
     }
     super.didChangeDependencies();
