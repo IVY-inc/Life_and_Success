@@ -29,8 +29,9 @@ class ExplorerScreen extends StatefulWidget {
 class _ExplorerScreenState extends State<ExplorerScreen> {
   String nav = '/goalplanner';
   @override
-  void didChangeDependencies() {
+  Widget build(context) {
     String navi = widget.explorerRoute;
+    print(navi);
     if (navi != null && navi != "") {
       nav = navi;
     }
@@ -42,11 +43,6 @@ class _ExplorerScreenState extends State<ExplorerScreen> {
       print('Explorer screen line 42');
       nav = '/goalplanner';
     }
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(context) {
     return WillPopScope(
         onWillPop: () => gBack != null ? gBack(isBackKey: true) : null,
         child: routes[nav]);

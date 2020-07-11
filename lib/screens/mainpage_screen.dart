@@ -35,37 +35,12 @@ class MainpageScreen extends StatefulWidget {
 class _MainpageScreenState extends State<MainpageScreen> {
   static PageController _pageController;
   static String payloa;
-  List<Widget> pages;
-  Widget getExplorer() {
-    if (MainpageScreen.notificationPayload != null) {
-      String np = MainpageScreen.notificationPayload;
-      //payload reset to null
-      MainpageScreen.notificationPayload = null;
-      
-      return ExplorerScreen(
-        explorerRoute: payloa,
-        back: itemClickHandle,
-        notificationPayload: np,
-      );
-    }
-    return ExplorerScreen(explorerRoute: payloa, back: itemClickHandle);
-  }
-
   @override
   void initState() {
     _pageController = PageController(
       keepPage: true,
       initialPage: widget.getPage(),
     );
-    pages = [
-      HomeScreen(
-        gridClickHandle: itemClickHandle,
-      ),
-      getExplorer(),
-      MusicScreen(back: itemClickHandle),
-      PlannerScreen(back: itemClickHandle),
-      ProfileScreen(),
-    ];
     super.initState();
   }
 
@@ -77,12 +52,16 @@ class _MainpageScreenState extends State<MainpageScreen> {
   ///FavoritesScreen() for now
   ///
   ///[isBackKey] for jumping back to page 1 of the mainPage
-  static void itemClickHandle(
+  void itemClickHandle(
       {String payload, bool isExplorer = false, bool isBackKey = false}) {
     //assertion to make sure that VoidCallBack is only responsible for one action at a time
     assert((isExplorer && isBackKey) == false);
 
-    if (payload != null) payloa = payload;
+    if (payload != null) {
+      setState((){
+        payloa = payload;
+      });
+    }
     if (isExplorer) {
       _pageController.animateToPage(1,
           duration: Duration(milliseconds: 300), curve: Curves.ease);
@@ -96,6 +75,15 @@ class _MainpageScreenState extends State<MainpageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget>pages = [
+      HomeScreen(
+        gridClickHandle: itemClickHandle,
+      ),
+      ExplorerScreen(explorerRoute: payloa,back: itemClickHandle,),
+      MusicScreen(back: itemClickHandle),
+      PlannerScreen(back: itemClickHandle),
+      ProfileScreen(),
+    ];
     return Scaffold(
       body: SafeArea(
         child: PageView.builder(
