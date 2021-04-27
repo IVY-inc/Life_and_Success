@@ -73,21 +73,28 @@ List<MaterialColor> colors = [
   Colors.cyan
 ];
 
-class SubMusicSection{
+class SubMusicSection {
   final String musicSubTitle;
   final int musicCount;
   final String thumbnailUrl;
   final String id;
-  const SubMusicSection({this.musicSubTitle,this.musicCount, this.id,this.thumbnailUrl});
-  String get title{
+  const SubMusicSection(
+      {this.musicSubTitle, this.musicCount, this.id, this.thumbnailUrl});
+  String get title {
     return musicSubTitle;
   }
-  String get subtitle{
+
+  String get subtitle {
     return '$musicCount audios';
   }
 }
-class MainMusicSection{
+
+class MainMusicSection {
   final String sectionTitle;
   final List<SubMusicSection> children;
   MainMusicSection(this.sectionTitle, this.children);
 }
+
+//stub data for books
+//TODO: use providers later to provide books
+final books = List.generate(15, (_) => 'Lorem ipsum');

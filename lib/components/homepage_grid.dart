@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class HomepageGrid extends StatelessWidget {
   final String text;
   final Function gridClickHandle;
-  HomepageGrid({this.text,this.gridClickHandle});
+  HomepageGrid({this.text, this.gridClickHandle});
   @override
   Widget build(BuildContext context) {
     //Gesture detector added.. error may occur here
     return GestureDetector(
-      onTapUp: (_) => gridClickHandle(isExplorer: true, payload: '/${text.toLowerCase().replaceAll(" ", "")}'),
+      onTapUp: (_) => gridClickHandle(
+          isExplorer: true,
+          payload: '/${text.toLowerCase().replaceAll(" ", "")}'),
       child: GridTile(
           footer: text == null
               ? null
