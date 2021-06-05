@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "789021005775",
+    "firebase_url": "https://life-and-success.firebaseio.com",
+    "project_id": "life-and-success",
+    "storage_bucket": "life-and-success.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:789021005775:android:f5b0eaeb426d58401ce4ba",
+        "android_client_info": {
+          "package_name": "com.ivy.life_and_success"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "789021005775-6epf8l9rppl6l77t3o4ubpovh005ag7l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCniOZ7VwCEn7CC-6BYk3SYqgLan5eRC8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "789021005775-6epf8l9rppl6l77t3o4ubpovh005ag7l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
