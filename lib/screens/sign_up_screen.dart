@@ -82,7 +82,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     ///[PASSWORD] field
     ///
-    final passWord = Row(
+    final password = Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
         Icon(
@@ -196,7 +196,7 @@ class _SignupScreenState extends State<SignupScreen> {
               children: <Widget>[
                 email,
                 SizedBox(height: 10),
-                passWord,
+                password,
                 SizedBox(height: 10),
                 confirmPassword,
                 SizedBox(height: 20),
@@ -219,6 +219,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   width: mediaquery.size.width - 32,
                   child: RaisedButton(
                     onPressed: () async {
+                      bool _hasError = false;
                       if (!_formKey.currentState.validate()) {
                         return;
                       } else {
@@ -233,9 +234,25 @@ class _SignupScreenState extends State<SignupScreen> {
                             _selectedGender,
                           );
                         } catch (e) {
-                          print(e);
+                          _hasError = true;
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              actions: <Widget>[
+                                FlatButton(
+                                  child: Text('Okay'),
+                                  onPressed: () => Navigator.of(ctx).pop(),
+                                )
+                              ],
+                              content: Text(e.toString()),
+                              title: Text('An error occured!'),
+                            ),
+                          );
                         }
-                        _isLoading = false;
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        if(!_hasError)
                         Navigator.of(context)
                             .pushReplacementNamed(WelcomeScreen.routeName);
                       } //TODO: Username setup instead
