@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
+import 'package:life_and_success/helper/notification_helper.dart';
+import 'package:life_and_success/main.dart';
 
 import './explore_screen.dart';
 import './music_screen.dart';
@@ -20,7 +24,13 @@ class MainpageScreen extends StatefulWidget {
 
   static const routeName = '/main';
   int getPage() {
-    if(notificationPayload!=null)return 1;
+    if (notificationPayload != null && notificationPayload.isNotEmpty) {
+      Map<String, dynamic> data = jsonDecode(notificationPayload);
+      if (data['type'] == PLANNER_COMPLETED) {
+        return 3;
+      }
+      return 1;
+    }
     return value;
   }
 
@@ -58,7 +68,7 @@ class _MainpageScreenState extends State<MainpageScreen> {
     assert((isExplorer && isBackKey) == false);
 
     if (payload != null) {
-      setState((){
+      setState(() {
         payloa = payload;
       });
     }
@@ -75,26 +85,27 @@ class _MainpageScreenState extends State<MainpageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget>pages = [
+    List<Widget> pages = [
       HomeScreen(
         gridClickHandle: itemClickHandle,
       ),
-      ExplorerScreen(explorerRoute: payloa,back: itemClickHandle,),
+      ExplorerScreen(
+        explorerRoute: payloa,
+        back: itemClickHandle,
+      ),
       MusicScreen(back: itemClickHandle),
-      PlannerScreen(back: itemClickHandle),
+      PlannerScreen(back: itemClickHandle, payload: notificationPayload),
       ProfileScreen(),
     ];
     return Scaffold(
       body: SafeArea(
         child: PageView.builder(
           itemCount: 5,
-          onPageChanged: (index){
+          onPageChanged: (index) {
             widget.setPage(index);
             _pageController.animateToPage(index,
                 duration: Duration(milliseconds: 300), curve: Curves.ease);
-                setState(() {
-                  
-                });
+            setState(() {});
           },
           itemBuilder: (ctx, index) => pages[index],
           controller: _pageController,

@@ -77,28 +77,30 @@ class MusicScreen extends StatelessWidget {
   final binaurals = binaura
       .map((e) => Container(
             width: 105,
-            child: Column(children: [
-              Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(12))),
-              Container(
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.only(left: 10),
-                child: Text(e.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    )),
-              ),
-              Container(
+            child: SingleChildScrollView(
+              child: Column(children: [
+                Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(12))),
+                Container(
                   alignment: Alignment.centerLeft,
                   padding: EdgeInsets.only(left: 10),
-                  child: Text(
-                    e.subtitle,
-                  )),
-            ]),
+                  child: Text(e.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      )),
+                ),
+                Container(
+                    alignment: Alignment.centerLeft,
+                    padding: EdgeInsets.only(left: 10),
+                    child: Text(
+                      e.subtitle,
+                    )),
+              ]),
+            ),
           ))
       .toList();
   @override
