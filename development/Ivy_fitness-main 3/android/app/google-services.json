@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "420809949906",
+    "firebase_url": "https://fitness-e215b-default-rtdb.firebaseio.com",
+    "project_id": "fitness-e215b",
+    "storage_bucket": "fitness-e215b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420809949906:android:b1ed35d96d30cf2dd7630b",
+        "android_client_info": {
+          "package_name": "com.example.fitness_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDPLQ4UIII47coluY3JcgRBMCV9xBvyOU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
